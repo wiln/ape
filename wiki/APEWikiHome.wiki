@@ -12,3 +12,5 @@ Add your content here.  Format your content with:
   * quickstart_flexbuilder_2
   * Headings, paragraphs, and lists
   * Automatic links to other wiki pages
+
+This is a test of linking quickstart_flexbuilder_2 and some thing else.
