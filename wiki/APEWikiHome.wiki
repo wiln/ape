@@ -1,4 +1,5 @@
 #summary APE wiki homepage.
+#labels Featured
 
 = Introduction =
 
