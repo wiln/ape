@@ -1,16 +1,11 @@
 #summary APE wiki homepage.
 #labels Featured
 
-= Introduction =
+= About =
 
 APE is an open source 2D physics engine written in actionscript 3. 
 
 
 = Tutorials =
 
-Add your content here.  Format your content with:
-  * quickstart_flexbuilder_2
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
-
-This is a test of linking quickstart_flexbuilder_2 and some thing else.
+  * [quickstart_flexbuilder_2 Quick Start - Flex Builder 2]
