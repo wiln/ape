@@ -20,11 +20,11 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /* 
-	TODO:
-	- Need removeForces method(s)
-	- Center and Position are the same, needs review.
-	- Should have alwaysRepaint functionality for Constraints, and bump up to AbstractItem
-	- See if there's anywhere where Vectors can be downgraded to simple Point classes
+TODO:
+- Need removeForces method(s)
+- Center and Position are the same, needs review.
+- Should have alwaysRepaint functionality for Constraints, and bump up to AbstractItem
+- See if there's anywhere where Vectors can be downgraded to simple Point classes
 */
 
 package org.cove.ape {

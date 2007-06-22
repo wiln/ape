@@ -19,16 +19,15 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFT
 OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-
 /*
-	TODO:
-	- get sprite() is duplicated in AbstractItem. Should be in some parent class.
-	- checkCollisionsVsCollection and checkInternalCollisions methods use SpringConstraint. 
-      it should be AbstractConstraint but the isConnectedTo method is in SpringConstraint.
-    - same deal with the paint() method here -- needs to test connected particles state 
-      using SpringConstraint methods but should really be AbstractConstraint. need to clear up
-      what an AbstractConstraint really means.
-    - would an explicit cast be more efficient in the paint() method here?
+TODO:
+- get sprite() is duplicated in AbstractItem. Should be in some parent class.
+- checkCollisionsVsCollection and checkInternalCollisions methods use SpringConstraint. 
+  it should be AbstractConstraint but the isConnectedTo method is in SpringConstraint.
+- same deal with the paint() method here -- needs to test connected particles state 
+  using SpringConstraint methods but should really be AbstractConstraint. need to clear up
+  what an AbstractConstraint really means.
+- would an explicit cast be more efficient in the paint() method here?
 */
 
 package org.cove.ape {

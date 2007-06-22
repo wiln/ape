@@ -24,7 +24,8 @@ TODO:
 - Get rid of all the object testing and use the double dispatch pattern
 - There's some physical differences in collision response for multisampled
   particles, probably due to prev/curr differences.
-*/ 
+*/
+
 package org.cove.ape {
 	
 
