@@ -20,8 +20,8 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /*	
-	TODO:
-	- review getProjection() for precomputing. radius can definitely be precomputed/stored
+TODO:
+- review getProjection() for precomputing. radius can definitely be precomputed/stored
 */
 
 package org.cove.ape {
