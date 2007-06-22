@@ -30,6 +30,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     - would an explicit cast be more efficient in the paint() method here?
 */
 
+
 package org.cove.ape {
 	
 	import flash.display.Sprite;
