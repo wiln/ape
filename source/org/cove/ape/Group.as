@@ -20,14 +20,15 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /*
-	TODO:
-	- should all getters for composites, particles, constraints arrays return
-	  a copy of the array? do we want to give the user direct access to it?
-	- addConstraintList, addParticleList
-	- if get particles and get constraints returned members of the Groups composites
-	  (as they probably should, the checkCollision... methods would probably be much
-	  cleaner.
-*/ 
+TODO:
+- should all getters for composites, particles, constraints arrays return
+  a copy of the array? do we want to give the user direct access to it?
+- addConstraintList, addParticleList
+- if get particles and get constraints returned members of the Groups composites
+  (as they probably should) the checkCollision methods would probably be much
+  cleaner.
+*/
+
 package org.cove.ape {
 	
 	

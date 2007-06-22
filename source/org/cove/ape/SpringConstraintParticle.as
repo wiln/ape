@@ -20,32 +20,25 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /*
-	TODO:
+TODO:
 
-	- scale the post collision velocity by both the position *and* mass of each particle. 
-	  currently only the position and average inverse mass is used. as with the velocity,
-	  it might be a problem since the contact point is not available when the mass is 
-	  needed.
-	  
-	- review all p1 p2 getters (eg get mass). can it be stored instead of computed everytime?
-	
-	- consider if the API should let the user set the SCP's properties directly. elasticity, 
-	  friction, mass, etc are all inherited from the attached particles
-	  
-	- consider a more accurate velocity getter. should use a parameterized value
-	  to scale the velocity relative to the contact point. one problem is the velocity is
-	  needed before the contact point is established.
-	
-	- setCorners is a duplicate from the updateCornerPositions method in the RectangleParticle class,
-	  it needs to be placed back in that class but use the displacement as suggested by Jim B. Its here
-	  because of the way RectangleParticle calculates the corners -- once on, they are calculated
-	  constantly. that should be fixed too.
-	  
-	- getContactPointParam should probably belong to the rectangleparticle and circleparticle classes. 
-	  also the functions respective to each, for better OOD
-	
-	- clean up resolveCollision with submethods
-	
+- scale the post collision velocity by both the position *and* mass of each particle. 
+  currently only the position and average inverse mass is used. as with the velocity,
+  it might be a problem since the contact point is not available when the mass is 
+  needed.
+- review all p1 p2 getters (eg get mass). can it be stored instead of computed everytime?
+- consider if the API should let the user set the SCP's properties directly. elasticity, 
+  friction, mass, etc are all inherited from the attached particles
+- consider a more accurate velocity getter. should use a parameterized value
+  to scale the velocity relative to the contact point. one problem is the velocity is
+  needed before the contact point is established.
+- setCorners is a duplicate from the updateCornerPositions method in the RectangleParticle class,
+  it needs to be placed back in that class but use the displacement as suggested by Jim B. Its here
+  because of the way RectangleParticle calculates the corners -- once on, they are calculated
+  constantly. that should be fixed too.
+- getContactPointParam should probably belong to the rectangleparticle and circleparticle classes. 
+  also the functions respective to each, for better OOD
+- clean up resolveCollision with submethods
 */
 
 package org.cove.ape {

@@ -25,6 +25,7 @@ TODO:
 - clear up the difference between speed and angularVelocity
 - can the wheel rotate steadily using speed? angularVelocity causes (unwanted?) acceleration
 */
+
 package org.cove.ape {
 	
 	

@@ -20,11 +20,12 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /*
-	TODO:
-	- fix the friction bug for two non-fixed particles in collision. The tangental
-	  component should not be scaled/applied in all instances, depending on the velocity
-	  of the other colliding item
-*/ 
+TODO:
+- fix the friction bug for two non-fixed particles in collision. The tangental
+  component should not be scaled/applied in all instances, depending on the velocity
+  of the other colliding item
+*/
+
 package org.cove.ape {
 	
 	// thanks to Jim Bonacci for changes using the inverse mass instead of mass

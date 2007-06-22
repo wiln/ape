@@ -20,14 +20,14 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /*
-	TODO:
-	- tearable, tearLength
-	- consider breaking the collidable (vs non collidable) functionality into another class
-	- get/set collidable, currently it is only get
-	- see if radian, angle, and center can be more efficient
-	- do we need a scaleToLength for non collidable?
-	- resolveCycles
+TODO:
+- tearable, tearLength
+- consider breaking the collidable (vs non collidable) functionality into another class
+- get/set collidable, currently it is only get
+- see if radian, angle, and center can be more efficient
+- do we need a scaleToLength for non collidable?
 */
+
 package org.cove.ape {
 	
 	import flash.display.Sprite;
