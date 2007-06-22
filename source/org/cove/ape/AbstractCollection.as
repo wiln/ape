@@ -19,7 +19,6 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFT
 OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-
 /*
 	TODO:
 	- get sprite() is duplicated in AbstractItem. Should be in some parent class.
