@@ -20,8 +20,8 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /* 
-	TODO:
-	- getProjection() needs review for any possibility of precomputing
+TODO:
+- getProjection() needs review for any possibility of precomputing
 */
 
 package org.cove.ape {
