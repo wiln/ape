@@ -59,6 +59,7 @@ package org.cove.ape {
 			_isParented = false;
 			_particles = new Array();
 			_constraints = new Array();
+			
 		}
 		
 		
