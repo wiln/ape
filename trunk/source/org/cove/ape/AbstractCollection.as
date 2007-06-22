@@ -53,7 +53,6 @@ package org.cove.ape {
 		
 		
 		public function AbstractCollection() {
-			
 			if (getQualifiedClassName(this) == "org.cove.ape::AbstractCollection") {
 				throw new ArgumentError("AbstractCollection can't be instantiated directly");
 			}
