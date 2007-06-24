@@ -39,6 +39,7 @@ TODO:
 - getContactPointParam should probably belong to the rectangleparticle and circleparticle classes. 
   also the functions respective to each, for better OOD
 - clean up resolveCollision with submethods
+- this class is internal, why are the methods public? review.
 */
 
 package org.cove.ape {
@@ -48,12 +49,13 @@ package org.cove.ape {
 	
 	internal class SpringConstraintParticle extends RectangleParticle {
 		
+		internal var parent:SpringConstraint;
+		
 		private var p1:AbstractParticle;
 		private var p2:AbstractParticle;
 		
 		private var avgVelocity:Vector;
 		private var lambda:Vector;
-		private var parent:SpringConstraint;
 		private var scaleToLength:Boolean;
 		
 		private var rca:Vector;
@@ -237,6 +239,14 @@ package org.cove.ape {
 		
 		
 		/**
+		 * Returns the value of the parent SpringConstraint <code>fixed</code> property.
+		 */
+		public override function get fixed():Boolean {
+			return parent.fixed;
+		}
+		
+		
+		/**
 		 * called only on collision
 		 */
 		internal function updatePosition():void {
@@ -252,6 +262,14 @@ package org.cove.ape {
 		internal override function resolveCollision(
 				mtd:Vector, vel:Vector, n:Vector, d:Number, o:int, p:AbstractParticle):void {
 				
+				
+			// dispatch the event if needed
+			if (this.hasEventListener(CollisionEvent.COLLIDE)) {
+				dispatchEvent(new CollisionEvent(CollisionEvent.COLLIDE, false, false, p));
+			}
+			
+			if (fixed || ! p.solid) return;
+			
 			var t:Number = getContactPointParam(p);
 			var c1:Number = (1 - t);
 			var c2:Number = t;

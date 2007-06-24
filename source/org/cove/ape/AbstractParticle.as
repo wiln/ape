@@ -158,9 +158,22 @@ package org.cove.ape {
 		
 
 		/**
-		 * Determines the number of intermediate position steps checked for collision each
-		 * cycle. Setting this number higher on fast moving particles can prevent 'tunneling'
-		 * -- when a particle moves so fast it misses collision with certain surfaces.
+		 * Determines the number of intermediate position steps during each collision test.
+		 * Setting this number higher on fast moving particles can prevent 'tunneling' -- when
+		 * a particle moves so fast it misses collision with another particle.
+		 * 
+		 * <p>
+		 * If two particles both have multisample levels greater than 0 then their multisample 
+		 * levels must be equal to be tested correctly. For example, if one particle has a multisample
+		 * level of 4 and another has a multisample level of 5 then the two particles will not be
+		 * tested for multisampled collision. This is due to the unequal amount of steps in the
+		 * collision test. 
+		 * </p>
+		 * 
+		 * <p>
+		 * Multisampling should not be used on a particle whose <code>fixed</code> property is 
+		 * set to <code>true</code>, since it will have no change in position.
+		 * </p>
 		 */ 
 		public function get multisample():int {
 			return _multisample; 
@@ -435,6 +448,15 @@ package org.cove.ape {
 		internal function resolveCollision(
 				mtd:Vector, vel:Vector, n:Vector, d:Number, o:int, p:AbstractParticle):void {
 					
+			
+			// dispatch the event if needed
+			if (this.hasEventListener(CollisionEvent.COLLIDE)) {
+				dispatchEvent(new CollisionEvent(CollisionEvent.COLLIDE, false, false, p));
+			}
+			
+			if (fixed || ! p.solid) return;
+			
+			// correct position and velocity
 			curr.plusEquals(mtd);
 			velocity = vel;
 		}

@@ -1,3 +1,10 @@
+TBD Version 0.5a;
+First addition of events - CollisionEvent class. AbstractItem now extends EventDispatcher.
+Added a new property 'solid' similar to collidable, but allows collision events to be triggered.
+Changes to the AbstractCollection and Group classes to allow safe removal of children during the collision testing cycle
+Fixed a bug where SpringConstraintParticle was not returning the fixed property correctly.
+
+
 06-21-07 Version 0.45a
 Two new properties for much greater stability - constraintCycles and constraintCollisionCycles
 Group now takes collideInternal setting as a parameter in the constructor.
