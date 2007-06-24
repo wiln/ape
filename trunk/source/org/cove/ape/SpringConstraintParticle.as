@@ -32,10 +32,7 @@ TODO:
 - consider a more accurate velocity getter. should use a parameterized value
   to scale the velocity relative to the contact point. one problem is the velocity is
   needed before the contact point is established.
-- setCorners is a duplicate from the updateCornerPositions method in the RectangleParticle class,
-  it needs to be placed back in that class but use the displacement as suggested by Jim B. Its here
-  because of the way RectangleParticle calculates the corners -- once on, they are calculated
-  constantly. that should be fixed too.
+- setCorners should be revisited.
 - getContactPointParam should probably belong to the rectangleparticle and circleparticle classes. 
   also the functions respective to each, for better OOD
 - clean up resolveCollision with submethods
