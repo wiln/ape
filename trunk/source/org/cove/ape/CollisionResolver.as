@@ -47,7 +47,7 @@ package org.cove.ape {
             var sumInvMass:Number = pa.invMass + pb.invMass;
             
             // the total friction in a collision is combined but clamped to [0,1]
-            var tf:Number = clamp(1 - (pa.friction + pb.friction), 0, 1);
+            var tf:Number = MathUtil.clamp(1 - (pa.friction + pb.friction), 0, 1);
             
             // get the collision components, vn and vt
             var ca:Collision = pa.getComponents(normal);
@@ -71,16 +71,9 @@ package org.cove.ape {
             vnA.plusEquals(ca.vt);
             vnB.plusEquals(cb.vt);
            
-            if (! pa.fixed) pa.resolveCollision(mtdA, vnA, normal, depth, -1, pb);
-            if (! pb.fixed) pb.resolveCollision(mtdB, vnB, normal, depth,  1, pa);
+            pa.resolveCollision(mtdA, vnA, normal, depth, -1, pb);
+            pb.resolveCollision(mtdB, vnB, normal, depth,  1, pa);
         }
-        
-    
-        internal static function clamp(input:Number, min:Number, max:Number):Number {
-        	if (input > max) return max;	
-            if (input < min) return min;
-            return input;
-        } 
     }
 }
 

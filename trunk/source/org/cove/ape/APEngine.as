@@ -26,6 +26,10 @@ TODO:
   dont involve non-collidable constraints
 - need a removeForces method
 - container should be automatic, but settable
+- globally, change all internal getters to directly access properties, for performance.
+  its better to break encapsulation within the library (not the public interface), rather
+  than suffer the performance hit -- although it would be worth it to review just how slow
+  the getters are in as3
 */
 
 package org.cove.ape {

@@ -27,13 +27,16 @@ package org.cove.ape {
 	
 	import flash.display.Sprite;
 	import flash.display.DisplayObject;
+	import flash.events.EventDispatcher;
 	
 	/** 
 	 * The base class for all constraints and particles
 	 */
-	public class AbstractItem {
+	public class AbstractItem extends EventDispatcher {
 		
 		private var _sprite:Sprite;
+		
+		private var _solid:Boolean;
 		private var _visible:Boolean;
 		private var _alwaysRepaint:Boolean;
 		
@@ -57,6 +60,7 @@ package org.cove.ape {
 		
 		
 		public function AbstractItem() {
+			_solid = true;
 			_visible = true;	
 			_alwaysRepaint = false;
 		}
@@ -124,6 +128,38 @@ package org.cove.ape {
 		public function set visible(v:Boolean):void {
 			_visible = v;
 			sprite.visible = v;
+		}
+
+
+		/**
+		 * Sets the solidity of the item. If an item is not solid, then other items colliding
+		 * with it will not respond to the collision. This property differs from 
+		 * <code>collidable</code> in that you can still test for collision events if
+		 * an item's <code>collidable</code> property is true and its <code>solid</code>
+		 * property is false. 
+		 * 
+		 * <p>
+		 * The <code>collidable</code> property takes precidence over the <code>solid</code>
+		 * property if <code>collidable</code> is set to false. That is, if <code>collidable</code>
+		 * is false, it won't matter if <code>solid</code> is set to true or false.
+		 * </p>
+		 * 
+		 * <p>
+		 * If you don't need to check for collision events, using <code>collidable</code>
+		 * is much more efficient. Always use <code>collidable</code> unless you need to
+		 * handle collision events.
+		 * </p>
+		 */	
+		public function get solid():Boolean {
+			return _solid;
+		}
+		
+		
+		/**
+		 * @private
+		 */			
+		public function set solid(s:Boolean):void {
+			_solid = s;
 		}
 
 

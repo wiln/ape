@@ -235,6 +235,7 @@ package org.cove.ape {
 			var len:int = collisionList.length;
 			for (var i:int = 0; i < len; i++) {
 				var g:Group = collisionList[i];
+				if (g == null) continue;
 				checkCollisionVsGroup(g);
 			}
 		}
@@ -250,6 +251,7 @@ package org.cove.ape {
 			for (var j:int = 0; j < clen; j++) {
 				
 				var ca:Composite = _composites[j];
+				if (ca == null) continue;
 				
 				// .. vs non composite particles and constraints in this group
 				ca.checkCollisionsVsCollection(this);
@@ -257,7 +259,7 @@ package org.cove.ape {
 				// ...vs every other composite in this Group
 				for (var i:int = j + 1; i < clen; i++) {
 					var cb:Composite = _composites[i];
-					ca.checkCollisionsVsCollection(cb);
+					if (cb != null) ca.checkCollisionsVsCollection(cb);
 				}
 			}
 		}
@@ -268,6 +270,7 @@ package org.cove.ape {
 			// check particles and constraints not in composites of either group
 			checkCollisionsVsCollection(g);
 			
+			var gc:Composite;
 			var clen:int = _composites.length;
 			var gclen:int = g.composites.length;
 			
@@ -276,18 +279,21 @@ package org.cove.ape {
 			
 				// check vs the particles and constraints of g
 				var c:Composite = _composites[i];
+				if (c == null) continue;
 				c.checkCollisionsVsCollection(g);
 				
 				// check vs composites of g
 				for (var j:int = 0; j < gclen; j++) {
-					var gc:Composite = g.composites[j];
+					gc = g.composites[j];
+					if (gc == null) continue;
 					c.checkCollisionsVsCollection(gc);
 				}
 			}
 			
 			// check particles and constraints of this group vs the composites of g
 			for (j = 0; j < gclen; j++) {
-				gc = g.composites[j];	
+				gc = g.composites[j];
+				if (gc == null) continue;	
 				checkCollisionsVsCollection(gc);
 			}
 		}

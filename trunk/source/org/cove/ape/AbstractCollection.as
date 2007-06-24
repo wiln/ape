@@ -257,19 +257,19 @@ package org.cove.ape {
 			for (var j:int = 0; j < plen; j++) {
 				
 				var pa:AbstractParticle = _particles[j];
-				if (! pa.collidable) continue;
+				if (pa == null || ! pa.collidable) continue;
 				
 				// ...vs every other particle in this AbstractCollection
 				for (var i:int = j + 1; i < plen; i++) {
 					var pb:AbstractParticle = _particles[i];
-					if (pb.collidable) CollisionDetector.test(pa, pb);
+					if (pb != null && pb.collidable) CollisionDetector.test(pa, pb);
 				}
 				
 				// ...vs every other constraint in this AbstractCollection
 				var clen:int = _constraints.length;
 				for (var n:int = 0; n < clen; n++) {
 					var c:SpringConstraint = _constraints[n];
-					if (c.collidable && ! c.isConnectedTo(pa)) {
+					if (c != null && c.collidable && ! c.isConnectedTo(pa)) {
 						c.scp.updatePosition();
 						CollisionDetector.test(pa, c.scp);
 					}
@@ -288,19 +288,19 @@ package org.cove.ape {
 			for (var j:int = 0; j < plen; j++) {
 				
 				var pga:AbstractParticle = _particles[j];
-				if (! pga.collidable) continue;
+				if (pga == null || ! pga.collidable) continue;
 				
 				// ...vs every particle in the other collection
 				var acplen:int = ac.particles.length;
 				for (var x:int = 0; x < acplen; x++) {
 					var pgb:AbstractParticle = ac.particles[x];
-					if (pgb.collidable) CollisionDetector.test(pga, pgb);
+					if (pgb != null && pgb.collidable) CollisionDetector.test(pga, pgb);
 				}
 				// ...vs every constraint in the other collection
 				var acclen:int = ac.constraints.length;
 				for (x = 0; x < acclen; x++) {
 					var cgb:SpringConstraint = ac.constraints[x];
-					if (cgb.collidable && ! cgb.isConnectedTo(pga)) {
+					if (cgb != null && cgb.collidable && ! cgb.isConnectedTo(pga)) {
 						cgb.scp.updatePosition();
 						CollisionDetector.test(pga, cgb.scp);
 					}
@@ -311,13 +311,13 @@ package org.cove.ape {
 			var clen:int = _constraints.length;
 			for (j = 0; j < clen; j++) {
 				var cga:SpringConstraint = _constraints[j];
-				if (! cga.collidable) continue;
+				if (cga == null || ! cga.collidable) continue;
 				
 				// ...vs every particle in the other collection
 				acplen = ac.particles.length;
 				for (var n:int = 0; n < acplen; n++) {
 					pgb = ac.particles[n];
-					if (pgb.collidable && ! cga.isConnectedTo(pgb)) {
+					if (pgb != null && pgb.collidable && ! cga.isConnectedTo(pgb)) {
 						cga.scp.updatePosition();
 						CollisionDetector.test(pgb, cga.scp);
 					}
