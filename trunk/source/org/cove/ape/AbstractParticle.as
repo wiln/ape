@@ -22,7 +22,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /* 
 TODO:
 - Need removeForces method(s)
-- Center and Position are the same, needs review.
+- Center and Position are the same, needs review. Also the comments need review.
 - Should have alwaysRepaint functionality for Constraints, and bump up to AbstractItem
 - See if there's anywhere where Vectors can be downgraded to simple Point classes
 */
@@ -285,7 +285,7 @@ package org.cove.ape {
 			prev.copy(p);
 		}
 
-	
+
 		/**
 		 * The x position of this particle
 		 */
@@ -293,7 +293,7 @@ package org.cove.ape {
 			return curr.x;
 		}
 
-		
+
 		/**
 		 * @private
 		 */
@@ -318,8 +318,8 @@ package org.cove.ape {
 			curr.y = y;
 			prev.y = y;	
 		}
-
-
+		
+		
 		/**
 		 * The velocity of the particle. If you need to change the motion of a particle, 
 		 * you should either use this property, or one of the addForce methods. Generally,
