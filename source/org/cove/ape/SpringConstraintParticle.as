@@ -259,7 +259,6 @@ package org.cove.ape {
 		internal override function resolveCollision(
 				mtd:Vector, vel:Vector, n:Vector, d:Number, o:int, p:AbstractParticle):void {
 				
-				
 			// dispatch the event if needed
 			if (this.hasEventListener(CollisionEvent.COLLIDE)) {
 				dispatchEvent(new CollisionEvent(CollisionEvent.COLLIDE, false, false, p));
