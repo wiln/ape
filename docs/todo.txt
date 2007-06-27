@@ -1,0 +1,18 @@
+
+implement
+---------------
+angular constraints
+first collisions event
+forces (& more forces)
+more demos
+
+
+consider
+---------------
+APEngine non-static (suggested by Troy Gilbert)
+
+
+
+Documentation
+---------------
+um...any?
