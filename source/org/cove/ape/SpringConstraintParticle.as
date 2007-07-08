@@ -33,10 +33,10 @@ TODO:
   to scale the velocity relative to the contact point. one problem is the velocity is
   needed before the contact point is established.
 - setCorners should be revisited.
-- getContactPointParam should probably belong to the rectangleparticle and circleparticle classes. 
-  also the functions respective to each, for better OOD
+- getContactPointParam should probably belong to the rectangleparticle and circleparticle  
+  classes. also the functions respective to each, for better OOD
 - clean up resolveCollision with submethods
-- this class is internal, why are the methods public? review.
+- this class is internal, why are the methods public?
 */
 
 package org.cove.ape {
@@ -184,7 +184,8 @@ package org.cove.ape {
 				var h:Number = rectHeight;
 				
 				inner.graphics.clear();
-				inner.graphics.lineStyle(parent.lineThickness, parent.lineColor, parent.lineAlpha);
+				inner.graphics.lineStyle(
+						parent.lineThickness, parent.lineColor, parent.lineAlpha);
 				inner.graphics.beginFill(parent.fillColor, parent.fillAlpha);
 				inner.graphics.drawRect(-w/2, -h/2, w, h);
 				inner.graphics.endFill();
@@ -250,29 +251,27 @@ package org.cove.ape {
 			var c:Vector = parent.center;
 			curr.setTo(c.x, c.y);
 			
-			width = (scaleToLength) ? parent.currLength * rectScale : parent.restLength * rectScale;
+			width = (scaleToLength) ? 
+					parent.currLength * rectScale : 
+					parent.restLength * rectScale;
 			height = rectHeight;
 			radian = parent.radian;
 		}
 		
 			
-		internal override function resolveCollision(
-				mtd:Vector, vel:Vector, n:Vector, d:Number, o:int, p:AbstractParticle):void {
+		internal override function resolveCollision(mtd:Vector, vel:Vector, n:Vector, 
+				d:Number, o:int, p:AbstractParticle):void {
 				
-			// dispatch the event if needed
-			if (this.hasEventListener(CollisionEvent.COLLIDE)) {
-				dispatchEvent(new CollisionEvent(CollisionEvent.COLLIDE, false, false, p));
-			}
-			
+			testParticleEvents(p);
 			if (fixed || ! p.solid) return;
 			
 			var t:Number = getContactPointParam(p);
 			var c1:Number = (1 - t);
 			var c2:Number = t;
 			
-			// if one is fixed then move the other particle the entire way out of collision.
-			// also, dispose of collisions at the sides of the scp. The higher the fixedEndLimit
-			// value, the more of the scp not be effected by collision. 
+			// if one is fixed then move the other particle the entire way out of 
+			// collision. also, dispose of collisions at the sides of the scp. The higher
+			// the fixedEndLimit value, the more of the scp not be effected by collision. 
 			if (p1.fixed) {
 				if (c2 <= fixedEndLimit) return;
 				lambda.setTo(mtd.x / c2, mtd.y / c2);
@@ -294,7 +293,8 @@ package org.cove.ape {
 				p1.curr.plusEquals(lambda.mult(c1));
 				p2.curr.plusEquals(lambda.mult(c2));
 			
-				// if collision is in the middle of SCP set the velocity of both end particles
+				// if collision is in the middle of SCP set the velocity of both end 
+				// particles
 				if (t == 0.5) {
 					p1.velocity = vel;
 					p2.velocity = vel;

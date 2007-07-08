@@ -33,8 +33,8 @@ package org.cove.ape {
 	
 	
 	/**
-	 * The Group class can contain Particles, Constraints, and Composites. Groups
-	 * can be assigned to be checked for collision with other Groups or internally. 
+	 * The Group class can contain Particles, Constraints, and Composites. Groups can be 
+	 * assigned to be checked for collision with other Groups or internally. 
 	 */ 
 	public class Group extends AbstractCollection {
 		
@@ -44,9 +44,10 @@ package org.cove.ape {
 		
 		
 		/**
-		 * The Group class is the main organizational class for APE. Once groups are created and populated 
-		 * with particles, constraints, and composites, they are added to the APEngine. Groups may contain
-		 * particles, constraints, and composites. Composites may only contain particles and constraints.
+		 * The Group class is the main organizational class for APE. Once groups are 
+		 * created and populated with particles, constraints, and composites, they are 
+		 * added to the APEngine. Groups may contain particles, constraints, and 
+		 * composites. Composites may only contain particles and constraints.
 		 */
 		public function Group(collideInternal:Boolean = false) {
 			_composites = new Array();
@@ -56,8 +57,8 @@ package org.cove.ape {
 		
 		
 		/**
-		 * Initializes every member of this Group by in turn calling 
-		 * each members <code>init()</code> method.
+		 * Initializes every member of this Group by in turn calling each members 
+		 * <code>init()</code> method.
 		 */
 		public override function init():void {
 			super.init();
@@ -102,8 +103,8 @@ package org.cove.ape {
 		
 
 		/**
-		 * Paints all members of this Group. This method is called automatically
-		 * by the APEngine class.
+		 * Paints all members of this Group. This method is called automatically by the 
+		 * APEngine class.
 		 */
 		public override function paint():void {
 
@@ -118,8 +119,7 @@ package org.cove.ape {
 
 
 		/**
-		 * Adds an Group instance to be checked for collision against
-		 * this one.
+		 * Adds an Group instance to be checked for collision against this one.
 		 */
 		public function addCollidable(g:Group):void {
 			 collisionList.push(g);
@@ -149,8 +149,7 @@ package org.cove.ape {
 		
 		
 		/**
-		 * Returns the array of every Group assigned to collide with 
-		 * this Group instance.
+		 * Returns the array of every Group assigned to collide with this Group instance.
 		 */
 		public function get collisionList():Array {
 			return _collisionList;
@@ -158,7 +157,8 @@ package org.cove.ape {
 	
 
 		/**
-		 * Returns an array of every particle, constraint, and composite added to the Group.
+		 * Returns an array of every particle, constraint, and composite added to the 
+		 * Group.
 		 */
 		public override function getAll():Array {
 			return particles.concat(constraints).concat(composites);
@@ -166,8 +166,8 @@ package org.cove.ape {
 
 						
 		/**
-		 * Determines if the members of this Group are checked for
-		 * collision with one another.
+		 * Determines if the members of this Group are checked for collision with one 
+		 * another.
 		 */
 		public function get collideInternal():Boolean {
 			return _collideInternal;
@@ -183,8 +183,8 @@ package org.cove.ape {
 		
 		
 		/**
-		 * Calls the <code>cleanup()</code> method of every member of this Group.
-		 * The cleanup() method is called automatically when an Group is removed
+		 * Calls the <code>cleanup()</code> method of every member of this Group.The 
+		 * <code>cleanup()</code> method is called automatically when an Group is removed
 		 * from the APEngine.
 		 */
 		public override function cleanup():void {

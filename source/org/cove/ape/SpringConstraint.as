@@ -304,6 +304,24 @@ package org.cove.ape {
 		
 		
 		/**
+		 * Corrects the position of the attached particles based on their position and
+		 *  mass. This method is called automatically during the APEngine.step() cycle.
+		 */			
+		public override function resolve():void {
+			
+			if (p1.fixed && p2.fixed) return;
+			
+			var deltaLength:Number = currLength;			
+			var diff:Number = (deltaLength - restLength) 
+					/ (deltaLength * (p1.invMass + p2.invMass));
+			var dmds:Vector = delta.mult(diff * stiffness);
+		
+			p1.curr.minusEquals(dmds.mult(p1.invMass));
+			p2.curr.plusEquals (dmds.mult(p2.invMass));
+		}		
+		
+		
+		/**
 		 * @private
 		 */
 		internal function initDisplay():void {
@@ -331,22 +349,6 @@ package org.cove.ape {
 		 */		
 		internal function get scp():SpringConstraintParticle {
 			return _scp;
-		}
-		
-		
-		/**
-		 * @private
-		 */			
-		internal override function resolve():void {
-			
-			if (p1.fixed && p2.fixed) return;
-			
-			var deltaLength:Number = currLength;			
-			var diff:Number = (deltaLength - restLength) / (deltaLength * (p1.invMass + p2.invMass));
-			var dmds:Vector = delta.mult(diff * stiffness);
-		
-			p1.curr.minusEquals(dmds.mult(p1.invMass));
-			p2.curr.plusEquals (dmds.mult(p2.invMass));
 		}
 		
 		

@@ -207,8 +207,8 @@ package org.cove.ape {
 		/**
 		 * @private
 		 */		
-		internal override function resolveCollision(
-				mtd:Vector, vel:Vector, n:Vector, d:Number, o:int, p:AbstractParticle):void {
+		internal override function resolveCollision(mtd:Vector, vel:Vector, n:Vector,
+				d:Number, o:int, p:AbstractParticle):void {
 			
 			// review the o (order) need here - its a hack fix
 			super.resolveCollision(mtd, vel, n, d, o, p);
