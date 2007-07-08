@@ -32,16 +32,9 @@ package org.cove.ape {
 	
 	internal final class CollisionResolver {
         
-        internal static function resolveParticleParticle(
-                pa:AbstractParticle, 
-                pb:AbstractParticle, 
-                normal:Vector, 
-                depth:Number):void {
-     		
-     		// a collision has occured. set the current positions to sample locations
-     		pa.curr.copy(pa.samp);
-     		pb.curr.copy(pb.samp);
-     		
+        internal static function resolve (pa:AbstractParticle, pb:AbstractParticle, 
+                normal:Vector, depth:Number):void {
+     	
             var mtd:Vector = normal.mult(depth);           
             var te:Number = pa.elasticity + pb.elasticity;
             var sumInvMass:Number = pa.invMass + pb.invMass;
@@ -53,7 +46,7 @@ package org.cove.ape {
             var ca:Collision = pa.getComponents(normal);
             var cb:Collision = pb.getComponents(normal);
 
-             // calculate the coefficient of restitution based on the mass, as the normal component
+             // calculate the coefficient of restitution as the normal component
             var vnA:Vector = (cb.vn.mult((te + 1) * pa.invMass).plus(
             		ca.vn.mult(pb.invMass - te * pa.invMass))).divEquals(sumInvMass);
             var vnB:Vector = (ca.vn.mult((te + 1) * pb.invMass).plus(

@@ -72,8 +72,9 @@ package org.cove.ape {
 		
 		
 		/**
-		 * @private
+		 * Corrects the position of the attached particles based on their position and
+		 * mass. This method is called automatically during the APEngine.step() cycle.
 		 */					
-		internal function resolve():void {}
+		public function resolve():void {}
 	}
 }

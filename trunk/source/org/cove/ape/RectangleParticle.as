@@ -21,6 +21,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /*	
 TODO:
+- repaint when width or height changes, check radius in circle as well.
 - review getProjection() for precomputing. radius can definitely be precomputed/stored
 */
 

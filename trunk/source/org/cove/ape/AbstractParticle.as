@@ -52,9 +52,11 @@ package org.cove.ape {
 		/** @private */
 		internal var interval:Interval;
 		
-		private var forces:Vector;
 		private var temp:Vector;
+		private var forces:Vector;
+		private var forceList:Array;
 		private var collision:Collision;
+		private var firstCollision:Boolean;
 				
 		private var _kfr:Number;
 		private var _mass:Number;
@@ -92,8 +94,11 @@ package org.cove.ape {
 			fixed = isFixed;
 			
 			forces = new Vector();
+			forceList = new Array();
+			
 			collision = new Collision(new Vector(), new Vector());
 			collidable = true;
+			firstCollision = false;
 			
 			this.mass = mass;
 			this.elasticity = elasticity;
@@ -159,20 +164,31 @@ package org.cove.ape {
 
 		/**
 		 * Determines the number of intermediate position steps during each collision test.
-		 * Setting this number higher on fast moving particles can prevent 'tunneling' -- when
-		 * a particle moves so fast it misses collision with another particle.
+		 * Setting this number higher on fast moving particles can prevent 'tunneling' 
+		 * -- when a particle moves so fast it misses collision with another particle.
 		 * 
 		 * <p>
-		 * If two particles both have multisample levels greater than 0 then their multisample 
-		 * levels must be equal to be tested correctly. For example, if one particle has a multisample
-		 * level of 4 and another has a multisample level of 5 then the two particles will not be
-		 * tested for multisampled collision. This is due to the unequal amount of steps in the
-		 * collision test. 
+		 * If two particles both have multisample levels greater than 0 then their 
+		 * multisample levels must be equal to be tested correctly. For example, if one 
+		 * particle has a multisample level of 4 and another has a multisample level of 5
+		 * then the two particles will not be tested for multisampled collision. This is
+		 * due to the unequal amount of steps in the collision test. 
 		 * </p>
 		 * 
 		 * <p>
-		 * Multisampling should not be used on a particle whose <code>fixed</code> property is 
-		 * set to <code>true</code>, since it will have no change in position.
+		 * Multisampling is currently buggy and should only be applied to particles that
+		 * have high velocity. You can selectively apply multisampling by doing something
+		 * like: 
+		 * </p>
+		 * 
+		 * <p>
+		 * <code>
+		 * if (myparticle.velocity.magnitude() > 20) {
+		 *     myparticle.multisample = 100;
+		 * } else {
+		 *     myparticle.multsample = 0;
+		 * }
+		 * </code>
 		 * </p>
 		 */ 
 		public function get multisample():int {
@@ -205,22 +221,19 @@ package org.cove.ape {
 		 * </p>
 		 * 
 		 * <p>
-		 * During collisions, the friction values are summed, but are clamped between 1 and 0.
-		 * For example, If two particles have 0.7 as their surface friction, then the resulting
-		 * friction between the two particles will be 1 (full friction).
-		 * </p>
-		 * 
-		 * <p>
-		 * In the current release, only dynamic friction is calculated. Static friction
-		 * is planned for a later release.
+		 * During collisions, the friction values are summed, but are clamped between 1 
+		 * and 0. For example, If two particles have 0.7 as their surface friction, then
+		 * the resulting friction between the two particles will be 1 (full friction).
 		 * </p>
 		 *
 		 * <p>
-		 * There is a bug in the current release where colliding non-fixed particles with friction
-		 * greater than 0 will behave erratically. A workaround is to only set the friction of
-		 * fixed particles.
+		 * There is a bug in the current release where colliding non-fixed particles with
+		 * friction greater than 0 will behave erratically. A workaround is to only set 
+		 * the friction of fixed particles.
 		 * </p>
-		 * @throws ArgumentError ArgumentError if the friction is set less than zero or greater than 1
+		 * 
+		 * @throws ArgumentError ArgumentError if the friction is set less than zero or 
+		 * greater than 1
 		 */	
 		public function get friction():Number {
 			return _friction; 
@@ -231,14 +244,16 @@ package org.cove.ape {
 		 * @private
 		 */
 		public function set friction(f:Number):void {
-			if (f < 0 || f > 1) throw new ArgumentError("Legal friction must be >= 0 and <=1");
+			if (f < 0 || f > 1)  {
+				throw new ArgumentError("Legal friction must be >= 0 and <=1");
+			}
 			_friction = f;
 		}
 		
 		
 		/**
-		 * The fixed state of the particle. If the particle is fixed, it does not move
-		 * in response to forces or collisions. Fixed particles are good for surfaces.
+		 * The fixed state of the particle. If the particle is fixed, it does not move in
+		 * response to forces or collisions. Fixed particles are good for surfaces.
 		 */
 		public function get fixed():Boolean {
 			return _fixed;
@@ -258,18 +273,20 @@ package org.cove.ape {
 		 * for drawing it or testing it for some custom purpose. 
 		 * 
 		 * <p>
-		 * When you get the <code>position</code> of a particle you are given a copy of the current
-		 * location. Because of this you cannot change the position of a particle by
-		 * altering the <code>x</code> and <code>y</code> components of the Vector you have retrieved from the position property.
-		 * You have to do something instead like: <code> position = new Vector(100,100)</code>, or
-		 * you can use the <code>px</code> and <code>py</code> properties instead.
+		 * When you get the <code>position</code> of a particle you are given a copy of 
+		 * the current location. Because of this you cannot change the position of a 
+		 * particle by altering the <code>x</code> and <code>y</code> components of the 
+		 * Vector you have retrieved from the position property. You have to do something
+		 * instead like: <code> position = new Vector(100,100)</code>, or you can use the
+		 * <code>px</code> and <code>py</code> properties instead.
 		 * </p>
 		 * 
 		 * <p>
 		 * You can alter the position of a particle three ways: change its position, set
-		 * its velocity, or apply a force to it. Setting the position of a non-fixed particle
-		 * is not the same as setting its fixed property to true. A particle held in place by 
-		 * its position will behave as if it's attached there by a 0 length spring constraint. 
+		 * its velocity, or apply a force to it. Setting the position of a non-fixed 
+		 * particle is not the same as setting its fixed property to true. A particle held
+		 * in place by its position will behave as if it's attached there by a 0 length
+		 * spring constraint. 
 		 * </p>
 		 */
 		public function get position():Vector {
@@ -323,8 +340,9 @@ package org.cove.ape {
 		/**
 		 * The velocity of the particle. If you need to change the motion of a particle, 
 		 * you should either use this property, or one of the addForce methods. Generally,
-		 * the addForce methods are best for slowly altering the motion. The velocity property
-		 * is good for instantaneously setting the velocity, e.g., for projectiles.
+		 * the addForce methods are best for slowly altering the motion. The velocity 
+		 * property is good for instantaneously setting the velocity, e.g., for 
+		 * projectiles.
 		 * 
 		 */
 		public function get velocity():Vector {
@@ -360,7 +378,9 @@ package org.cove.ape {
 		/**
 		 * Assigns a DisplayObject to be used when painting this particle.
 		 */ 
-		public function setDisplay(d:DisplayObject, offsetX:Number=0, offsetY:Number=0, rotation:Number=0):void {
+		public function setDisplay(d:DisplayObject, offsetX:Number=0, offsetY:Number=0,
+				 rotation:Number=0):void {
+			
 			displayObject = d;
 			displayObjectRotation = rotation;
 			displayObjectOffset = new Vector(offsetX, offsetY);
@@ -368,33 +388,16 @@ package org.cove.ape {
 		
 		
 		/**
-		 * Adds a force to the particle. The mass of the particle is taken into 
-		 * account when using this method, so it is useful for adding forces 
-		 * that simulate effects like wind. Particles with larger masses will
-		 * not be affected as greatly as those with smaller masses. Note that the
-		 * size (not to be confused with mass) of the particle has no effect 
-		 * on its physical behavior with respect to forces.
+		 * Adds a force to the particle. Using this method to a force directly to the
+		 * particle will only apply that force for a single APEngine.step() cycle. 
 		 * 
-		 * @param f A Vector represeting the force added.
+		 * @param f An IForce object.
 		 */ 
-		public function addForce(f:Vector):void {
-			forces.plusEquals(f.mult(invMass));
-		}
+		 public function addForce(f:IForce):void {
+		 	forceList.push(f);
+		 }
 		
-		
-		/**
-		 * Adds a 'massless' force to the particle. The mass of the particle is 
-		 * not taken into account when using this method, so it is useful for
-		 * adding forces that simulate effects like gravity. Particles with 
-		 * larger masses will be affected the same as those with smaller masses.
-		 *
-		 * @param f A Vector represeting the force added.
-		 */ 	
-		public function addMasslessForce(f:Vector):void {
-			forces.plusEquals(f);
-		}
-		
-			
+	
 		/**
 		 * The <code>update()</code> method is called automatically during the
 		 * APEngine.step() cycle. This method integrates the particle.
@@ -403,19 +406,23 @@ package org.cove.ape {
 			
 			if (fixed) return;
 			
-			// global forces
-			addForce(APEngine.force);
-			addMasslessForce(APEngine.masslessForce);
+			accumulateForces();
 	
-			// integrate
-			temp.copy(curr);
-			
+			temp.copy(curr);			
 			var nv:Vector = velocity.plus(forces.multEquals(dt2));
 			curr.plusEquals(nv.multEquals(APEngine.damping));
 			prev.copy(temp);
 
-			// clear the forces
-			forces.setTo(0,0);
+			clearForces();
+		}
+		
+		
+		/**
+		 * Resets the collision state of the particle. This value is used in conjuction
+		 * with the CollisionEvent.FIRST_COLLISION event.
+		 */	
+		public function resetFirstCollision():void {
+			firstCollision = false;
 		}
 		
 		
@@ -444,19 +451,17 @@ package org.cove.ape {
 	
 		/**
 		 * @private
+		 * 
+		 * Make sure to align  the overriden versions of this method in
+		 * WheelParticle
 		 */	
-		internal function resolveCollision(
-				mtd:Vector, vel:Vector, n:Vector, d:Number, o:int, p:AbstractParticle):void {
+		internal function resolveCollision(mtd:Vector, vel:Vector, n:Vector, d:Number,
+				o:int, p:AbstractParticle):void {
 					
+			testParticleEvents(p);
+			if (fixed || (! solid) || (! p.solid)) return;
 			
-			// dispatch the event if needed
-			if (this.hasEventListener(CollisionEvent.COLLIDE)) {
-				dispatchEvent(new CollisionEvent(CollisionEvent.COLLIDE, false, false, p));
-			}
-			
-			if (fixed || ! p.solid) return;
-			
-			// correct position and velocity
+			curr.copy(samp);
 			curr.plusEquals(mtd);
 			velocity = vel;
 		}
@@ -465,8 +470,57 @@ package org.cove.ape {
 		/**
 		 * @private
 		 */		
+		internal function testParticleEvents(p:AbstractParticle):void {		
+			
+			if (hasEventListener(CollisionEvent.COLLIDE)) {
+				dispatchEvent(new CollisionEvent(
+						CollisionEvent.COLLIDE, false, false, p));
+			}
+			
+			if (hasEventListener(CollisionEvent.FIRST_COLLIDE) && ! firstCollision) {
+				firstCollision = true;
+				dispatchEvent(new CollisionEvent(
+						CollisionEvent.FIRST_COLLIDE, false, false, p));
+			}
+		}
+		
+			
+		/**
+		 * @private
+		 */		
 		internal function get invMass():Number {
 			return (fixed) ? 0 : _invMass; 
+		}
+		
+		
+		/**
+		 * Accumulates both the particle forces and the global forces
+		 */
+		private function accumulateForces():void {
+			
+			var f:IForce;
+			
+			var len:int = forceList.length;
+			for (var i:int = 0; i < len; i++) {
+				f = forceList[i];
+				forces.plusEquals(f.getValue(_invMass));
+			}
+			
+			var globalForces:Array = APEngine.forces;
+			len = globalForces.length;
+			for (i = 0; i < len; i++) {
+				f = globalForces[i];
+				forces.plusEquals(f.getValue(_invMass));
+			}
+		}
+		
+		
+		/**
+		 * Clears out all forces on the particle
+		 */
+		private function clearForces():void {
+			forceList.length = 0;
+			forces.setTo(0,0);
 		}
 	}	
 }

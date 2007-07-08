@@ -127,7 +127,14 @@ package org.cove.ape {
 			 return mult(1 / m);
 		}
 		
-				
+		
+		public function normalizeEquals():Vector {
+			 var m:Number = magnitude();
+			 if (m == 0) m = 0.0001;
+			 return multEquals(1 / m);
+		}
+			
+					
 		public function toString():String {
 			return (x + " : " + y);
 		}

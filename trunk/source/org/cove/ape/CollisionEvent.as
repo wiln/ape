@@ -14,6 +14,7 @@ package org.cove.ape {
 		 * Defines the value of the type property of a collide event object
 		 */
 		public static const COLLIDE:String = "collide";
+		public static const FIRST_COLLIDE:String = "firstCollide";
 		
 		private var _collidingItem:AbstractItem;
 		
@@ -35,7 +36,8 @@ package org.cove.ape {
 		public function get collidingItem():AbstractItem {
 		
 			if (_collidingItem is SpringConstraintParticle) {
-				var scp:SpringConstraintParticle = _collidingItem as SpringConstraintParticle;
+				var scp:SpringConstraintParticle = _collidingItem 
+						as SpringConstraintParticle;
 				return scp.parent;
 			}
 			return _collidingItem;
