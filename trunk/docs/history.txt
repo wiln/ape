@@ -1,5 +1,7 @@
 TBD Version 0.5a;
-First addition of events - CollisionEvent class. AbstractItem now extends EventDispatcher.
+AbstractConstraint.resolve() is now public so it can be overridden (thanks to Interfaced)
+CollisionEvent class with COLLISION and FIRST_COLLISION events.
+AbstractItem now extends EventDispatcher.
 Added a new property 'solid' similar to collidable, but allows collision events to be triggered.
 Changes to the AbstractCollection and Group classes to allow safe removal of children during the collision testing cycle
 Fixed a bug where SpringConstraintParticle was not returning the fixed property correctly.
