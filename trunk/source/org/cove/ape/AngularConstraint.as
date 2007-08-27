@@ -28,6 +28,7 @@ package org.cove.ape {
 	
 	import flash.display.Sprite;
 	import flash.display.DisplayObject;
+	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
@@ -36,6 +37,8 @@ package org.cove.ape {
 	 * An Angular Constraint between 3 particles
 	 */
 	public class AngularConstraint extends AbstractConstraint{
+		
+		private static const PI2:Number = Math.PI * 2;
 		
 		private var _p1:AbstractParticle;
 		private var _p2:AbstractParticle;
@@ -145,53 +148,12 @@ package org.cove.ape {
 		
 		
 		/**
-		 * If the <code>collidable</code> property is true, you can set the scale of the collidible area
-		 * between the two attached particles. Valid values are from 0 to 1. If you set the value to 1, then
-		 * the collision area will extend all the way to the two attached particles. Setting the value lower
-		 * will result in an collision area that spans a percentage of that distance. Setting the value
-		 * higher will cause the collision rectangle to extend past the two end particles.
-		 */		 	
-		public function set rectScale(s:Number):void {
-			if (scp == null) return;
-			scp.rectScale = s;
-		}
-		
-		
-		/**
-		 * @private
-		 */			
-		public function get rectScale():Number {
-			return scp.rectScale;
-		}
-		
-		
-		/**
 		 * Returns the length of the SpringConstraint, the distance between its two 
 		 * attached particles.
 		 */ 
 		public function get currLength():Number {
 			return p1.curr.distance(p2.curr);
 		}
-		
-		
-		/**
-		 * If the <code>collidable</code> property is true, you can set the height of the 
-		 * collidible rectangle between the two attached particles. Valid values are greater 
-		 * than 0. If you set the value to 10, then the collision rect will be 10 pixels high.
-		 * The height is perpendicular to the line connecting the two particles
-		 */	 
-		public function get rectHeight():Number {
-			return scp.rectHeight;
-		}
-		
-		
-		/**
-		 * @private
-		 */	
-		public function set rectHeight(h:Number):void {
-			if (scp == null) return;
-			scp.rectHeight = h;
-		}			
 		
 			
 		/**
@@ -213,51 +175,6 @@ package org.cove.ape {
 			_restLength = r;
 		}
 		
-			
-		/**
-		 * Determines if the area between the two particles is tested for collision. If this value is on
-		 * you can set the <code>rectHeight</code> and <code>rectScale</code> properties 
-		 * to alter the dimensions of the collidable area.
-		 */			
-		public function get collidable():Boolean {
-			return _collidable;
-		}
-		
-		
-		/**
-		 * For cases when the SpringConstraint is <code>collidable</code> and only one of the
-		 * two end particles are fixed. This value will dispose of collisions near the
-		 * fixed particle, to correct for situations where the collision could never be
-		 * resolved. Values must be between 0.0 and 1.0.
-		 */	
-		public function get fixedEndLimit():Number {
-			return scp.fixedEndLimit;
-		}	
-				
-				
-		/**
-		 * @private
-		 */	
-		public function set fixedEndLimit(f:Number):void {
-			if (scp == null) return;
-			scp.fixedEndLimit = f;
-		}
-		
-					
-		/**
-		 *
-		 */		
-		public function setCollidable(b:Boolean, rectHeight:Number, 
-				rectScale:Number, scaleToLength:Boolean=false):void {
-			
-			_collidable = b;
-			_scp = null;
-			
-			if (_collidable) {
-				//_scp = new SpringConstraintParticle(p1, p2, this, rectHeight, rectScale, scaleToLength);			
-			}
-		}
-		
 		
 		/**
 		 * Returns true if the passed particle is one of the two particles attached to 
@@ -275,41 +192,51 @@ package org.cove.ape {
 			return (p1.fixed && p2.fixed && p3.fixed);
 		}
 		
+		
 		public function get minAng():Number{
 			return _minAng;
 		}
+		
 		
 		public function set minAng(n:Number):void{
 			_minAng = n;
 		}
 		
+		
 		public function get maxAng():Number{
 			return _maxAng;
 		}
+		
 		
 		public function set maxAng(n:Number):void{
 			_maxAng = n;
 		}
 		
+		
 		public function get minBreakAng():Number{
 			return _minBreakAng;
 		}
+		
 		
 		public function set minBreakAng(n:Number):void{
 			_minBreakAng = n;
 		}
 		
+		
 		public function get maxBreakAng():Number{
 			return _maxBreakAng;
 		}
+		
 		
 		public function set maxBreakAng(n:Number):void{
 			_maxBreakAng = n;
 		}
 		
+		
 		public function get broken():Boolean{
 			return _broken;
 		}
+		
 		
 		public function set broken(b:Boolean):void{
 			_broken = b;
@@ -385,30 +312,14 @@ package org.cove.ape {
 				sprite.addChild(displayObject);
 			}
 		}
-		
-							
-		/**
-		 * @private
-		 */		
-		internal function get delta():Vector {
-			return p1.curr.minus(p2.curr);
-		}		
 
-
-		/**
-		 * @private
-		 */		
-		internal function get scp():SpringConstraintParticle {
-			return _scp;
-		}
 		
 		/**
 		 * @private
 		 */
 		internal override function resolve():void {
-			if (broken) return;
 			
-			var PI2:Number = Math.PI*2;
+			if (broken) return;
 			
 			var ang12:Number = Math.atan2(p2.curr.y - p1.curr.y, p2.curr.x - p1.curr.x);
 			var ang23:Number = Math.atan2(p3.curr.y - p2.curr.y, p3.curr.x - p2.curr.x);
@@ -424,26 +335,30 @@ package org.cove.ape {
 			
 			var lowMid:Number = (maxAng - minAng) / 2;
 			var highMid:Number = (maxAng + minAng) / 2;
-     		var breakAng:Number = (maxBreakAng - minBreakAng)/2;
+     		var breakAng:Number = (maxBreakAng - minBreakAng) / 2;
 			
      		var newDiff:Number = highMid - angDiff;
 			if (newDiff > Math.PI) newDiff -= PI2;
 			if (newDiff < -Math.PI) newDiff += PI2;
 			
-			if (newDiff > lowMid){
-				if(newDiff > breakAng){
+			if (newDiff > lowMid) {
+				
+				if (newDiff > breakAng) {
 					broken = true;
 					dispatchEvent(new Event("constraintBroken"));
 					return;
 				}
 				angChange = newDiff - lowMid;
-			}else if (newDiff < -lowMid){
-				if(newDiff < - breakAng){
+				
+			} else if (newDiff < -lowMid) {
+				
+				if (newDiff < - breakAng) {
 					broken = true;
 					dispatchEvent(new Event("constraintBroken"));
 					return;
 				}
 				angChange = newDiff + lowMid;
+				
 			}
 			
 			var finalAng:Number = angChange * this.stiffness + ang12;
@@ -455,6 +370,16 @@ package org.cove.ape {
 			p2.curr.x = displaceX + Math.cos(finalAng) * restLength * mult2;
 			p2.curr.y = displaceY + Math.sin(finalAng) * restLength * mult2;	
 		}
+		
+		
+		// acradian is the measurement of how far from 180
+		public function get acRadian():Number{
+    		var ang12:Number = Math.atan2(p2.curr.y - p1.curr.y, p2.curr.x - p1.curr.x);
+    		var ang23:Number = Math.atan2(p3.curr.y - p2.curr.y, p3.curr.x - p2.curr.x);
+    
+   			 var angDiff:Number = ang12 - ang23;
+    		return angDiff;
+   		}
 		
 		
 		/**
