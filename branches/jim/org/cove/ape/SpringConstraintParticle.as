@@ -20,23 +20,32 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /*
-TODO:
+	TODO:
 
-- scale the post collision velocity by both the position *and* mass of each particle. 
-  currently only the position and average inverse mass is used. as with the velocity,
-  it might be a problem since the contact point is not available when the mass is 
-  needed.
-- review all p1 p2 getters (eg get mass). can it be stored instead of computed everytime?
-- consider if the API should let the user set the SCP's properties directly. elasticity, 
-  friction, mass, etc are all inherited from the attached particles
-- consider a more accurate velocity getter. should use a parameterized value
-  to scale the velocity relative to the contact point. one problem is the velocity is
-  needed before the contact point is established.
-- setCorners should be revisited.
-- getContactPointParam should probably belong to the rectangleparticle and circleparticle  
-  classes. also the functions respective to each, for better OOD
-- clean up resolveCollision with submethods
-- this class is internal, why are the methods public?
+	- scale the post collision velocity by both the position *and* mass of each particle. 
+	  currently only the position and average inverse mass is used. as with the velocity,
+	  it might be a problem since the contact point is not available when the mass is 
+	  needed.
+	  
+	- review all p1 p2 getters (eg get mass). can it be stored instead of computed everytime?
+	
+	- consider if the API should let the user set the SCP's properties directly. elasticity, 
+	  friction, mass, etc are all inherited from the attached particles
+	  
+	- consider a more accurate velocity getter. should use a parameterized value
+	  to scale the velocity relative to the contact point. one problem is the velocity is
+	  needed before the contact point is established.
+	
+	- setCorners is a duplicate from the updateCornerPositions method in the RectangleParticle class,
+	  it needs to be placed back in that class but use the displacement as suggested by Jim B. Its here
+	  because of the way RectangleParticle calculates the corners -- once on, they are calculated
+	  constantly. that should be fixed too.
+	  
+	- getContactPointParam should probably belong to the rectangleparticle and circleparticle classes. 
+	  also the functions respective to each, for better OOD
+	
+	- clean up resolveCollision with submethods
+	
 */
 
 package org.cove.ape {
@@ -46,13 +55,12 @@ package org.cove.ape {
 	
 	internal class SpringConstraintParticle extends RectangleParticle {
 		
-		internal var parent:SpringConstraint;
-		
 		private var p1:AbstractParticle;
 		private var p2:AbstractParticle;
 		
 		private var avgVelocity:Vector;
 		private var lambda:Vector;
+		private var parentConstraint:SpringConstraint;
 		private var scaleToLength:Boolean;
 		
 		private var rca:Vector;
@@ -79,7 +87,7 @@ package org.cove.ape {
 			lambda = new Vector(0,0);
 			avgVelocity = new Vector(0,0);
 			
-			parent = p;
+			parentConstraint = p;
 			this.rectScale = rectScale;
 			this.rectHeight = rectHeight;
 			this.scaleToLength = scaleToLength;
@@ -177,16 +185,15 @@ package org.cove.ape {
 				initDisplay();
 			} else {
 				var inner:Sprite = new Sprite();
-				parent.sprite.addChild(inner);
+				parentConstraint.sprite.addChild(inner);
 				inner.name = "inner";
 							
-				var w:Number = parent.currLength * rectScale;
+				var w:Number = parentConstraint.currLength * rectScale;
 				var h:Number = rectHeight;
 				
 				inner.graphics.clear();
-				inner.graphics.lineStyle(
-						parent.lineThickness, parent.lineColor, parent.lineAlpha);
-				inner.graphics.beginFill(parent.fillColor, parent.fillAlpha);
+				inner.graphics.lineStyle(parentConstraint.lineThickness, parentConstraint.lineColor, parentConstraint.lineAlpha);
+				inner.graphics.beginFill(parentConstraint.fillColor, parentConstraint.fillAlpha);
 				inner.graphics.drawRect(-w/2, -h/2, w, h);
 				inner.graphics.endFill();
 			}
@@ -196,17 +203,17 @@ package org.cove.ape {
 		
 		public override function paint():void {
 			
-			var c:Vector = parent.center;
-			var s:Sprite = parent.sprite;
+			var c:Vector = parentConstraint.center;
+			var s:Sprite = parentConstraint.sprite;
 			
 			if (scaleToLength) {
-				s.getChildByName("inner").width = parent.currLength * rectScale;
+				s.getChildByName("inner").width = parentConstraint.currLength * rectScale;
 			} else if (displayObject != null) {
-				s.getChildByName("inner").width = parent.restLength * rectScale;
+				s.getChildByName("inner").width = parentConstraint.restLength * rectScale;
 			}
 			s.x = c.x; 
 			s.y = c.y;
-			s.rotation = parent.angle;
+			s.rotation = parentConstraint.angle;
 		}
 		
 		
@@ -222,7 +229,7 @@ package org.cove.ape {
 			inner.name = "inner";
 			
 			inner.addChild(displayObject);
-			parent.sprite.addChild(inner);
+			parentConstraint.sprite.addChild(inner);
 		}	
 		
 				
@@ -237,41 +244,28 @@ package org.cove.ape {
 		
 		
 		/**
-		 * Returns the value of the parent SpringConstraint <code>fixed</code> property.
-		 */
-		public override function get fixed():Boolean {
-			return parent.fixed;
-		}
-		
-		
-		/**
 		 * called only on collision
 		 */
 		internal function updatePosition():void {
-			var c:Vector = parent.center;
+			var c:Vector = parentConstraint.center;
 			curr.setTo(c.x, c.y);
 			
-			width = (scaleToLength) ? 
-					parent.currLength * rectScale : 
-					parent.restLength * rectScale;
+			width = (scaleToLength) ? parentConstraint.currLength * rectScale : parentConstraint.restLength * rectScale;
 			height = rectHeight;
-			radian = parent.radian;
+			radian = parentConstraint.radian;
 		}
 		
 			
-		internal override function resolveCollision(mtd:Vector, vel:Vector, n:Vector, 
-				d:Number, o:int, p:AbstractParticle):void {
+		public override function resolveCollision(
+				mtd:Vector, vel:Vector, n:Vector, d:Number, o:int, p:AbstractParticle):void {
 				
-			testParticleEvents(p);
-			if (fixed || ! p.solid) return;
-			
 			var t:Number = getContactPointParam(p);
 			var c1:Number = (1 - t);
 			var c2:Number = t;
 			
-			// if one is fixed then move the other particle the entire way out of 
-			// collision. also, dispose of collisions at the sides of the scp. The higher
-			// the fixedEndLimit value, the more of the scp not be effected by collision. 
+			// if one is fixed then move the other particle the entire way out of collision.
+			// also, dispose of collisions at the sides of the scp. The higher the fixedEndLimit
+			// value, the more of the scp not be effected by collision. 
 			if (p1.fixed) {
 				if (c2 <= fixedEndLimit) return;
 				lambda.setTo(mtd.x / c2, mtd.y / c2);
@@ -293,8 +287,7 @@ package org.cove.ape {
 				p1.curr.plusEquals(lambda.mult(c1));
 				p2.curr.plusEquals(lambda.mult(c2));
 			
-				// if collision is in the middle of SCP set the velocity of both end 
-				// particles
+				// if collision is in the middle of SCP set the velocity of both end particles
 				if (t == 0.5) {
 					p1.velocity = vel;
 					p2.velocity = vel;

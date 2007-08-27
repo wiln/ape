@@ -18,18 +18,13 @@ HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTIO
 CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
 OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-
 /*
 TODO:
-- collidible SpringConstraints should have their own collection controlled from within the
-  add/remove constraint methods here -- so collision checks dont involve non-collidable
-  constraints.
+- collidible SpringConstraints should have their own collection controlled
+  from within the add/remove constraint methods here -- so collision checks
+  dont involve non-collidable constraints
 - need a removeForces method
 - container should be automatic, but settable
-- globally, change all internal getters to directly access properties, for performance.
-  its better to break encapsulation within the library (not the public interface),
-  rather than suffer the performance hit -- although it would be worth it to review
-  just how slow the getters are in as3
 */
 
 package org.cove.ape {
@@ -43,7 +38,9 @@ package org.cove.ape {
 	public final class APEngine {
 		
 		/**@private */
-		internal static var forces:Array;
+		internal static var force:Vector;
+		/**@private */
+		internal static var masslessForce:Vector;
 			
 		private static var groups:Array;
 		private static var numGroups:int;
@@ -57,34 +54,36 @@ package org.cove.ape {
 		
 	
 		/**
-		 * Initializes the engine. You must call this method prior to adding any 
-		 * particles or constraints.
+		 * Initializes the engine. You must call this method prior to adding
+		 * any particles or constraints.
 		 * 
-		 * @param dt The delta time value for the engine. This parameter can be used --
-		 * in conjunction with speed at which <code>APEngine.step()</code> is called -- 
-		 * to change the speed of the simulation. Typical values are 1/3 or 1/4. Lower 
-		 * values result in slower, but more accurate simulations, and higher ones 
-		 * result in faster, less accurate ones. Note that this only applies to the 
-		 * forces added to particles. If you do not add any forces, the <code>dt</code> 
-		 * value won't matter.
+		 * @param dt The delta time value for the engine. This parameter can be used -- in 
+		 * conjunction with speed at which <code>APEngine.step()</code> is called -- to change the speed
+		 * of the simulation. Typical values are 1/3 or 1/4. Lower values result in slower,
+		 * but more accurate simulations, and higher ones result in faster, less accurate ones.
+		 * Note that this only applies to the forces added to particles. If you do not add any
+		 * forces, the <code>dt</code> value won't matter.
 		 */
 		public static function init(dt:Number = 0.25):void {
 			timeStep = dt * dt;
 			
 			numGroups = 0;
 			groups = new Array();
-			forces = new Array();
+		
+			force = new Vector(0,0);
+			masslessForce = new Vector(0,0);
 			
-			_damping = 1;
+			damping = 1;
+			
 			_constraintCycles = 0;
 			_constraintCollisionCycles = 1;
 		}
 
 
 		/**
-		 * The global damping. Values should be between 0 and 1. Higher numbers result
-		 * in less damping. A value of 1 is no damping. A value of 0 won't allow any
-		 * particles to move. The default is 1.
+		 * The global damping. Values should be between 0 and 1. Higher numbers
+		 * result in less damping. A value of 1 is no damping. A value of 0 will
+		 * not allow any particles to move. The default is 1.
 		 * 
 		 * <p>
 		 * Damping will slow down your simulation and make it more stable. If you find
@@ -140,15 +139,15 @@ package org.cove.ape {
 		/**
 		 * 
 		 * Determines the number of times in a single <code>APEngine.step()</code> cycle that
-		 * the constraints have their positions corrected and particles in collision have their
-		 * positions corrected. This can greatly increase stability and prevent breakthroughs,
-		 * especially with large complex arrangements of constraints and particles. The larger
-		 * this number, the more stable the simulation, at an expense of performance.
+		 * the constraints and particles have their positions corrected. This can greatly increase
+		 * stability and prevent breakthroughs, especially with large complex arrangements of 
+		 * constraints and particles. The larger this number, the more stable the simulation,
+		 * at an expense of performance.
 		 *
 		 * <p> 
 		 * This setting differs from the <code>constraintCycles</code> property in that it
-		 * resolves both constraints and collisions during a <code>APEngine.step()</code>,
-		 * as opposed to just the constraints. The default value is 1.
+		 * resolves both constraints and collisions during a <code>APEngine.step()</code>. 
+		 * The default value is 1.
 		 * </p>
 		 */
 		public static function get constraintCollisionCycles():int {
@@ -169,8 +168,7 @@ package org.cove.ape {
 		 * constraints. If you wish to use to the built in painting methods you must set 
 		 * this first.
 		 *
-		 * @param s An instance of the Sprite class that will be used as the default 
-		 * container.
+		 * @param s An instance of the Sprite class that will be used as the default container.
 		 */
 		public static function get container():DisplayObjectContainer {
 			return _container;
@@ -186,37 +184,35 @@ package org.cove.ape {
 		
 	
 		/**
-		 * Adds a force to all particles in the system. The forces added to the APEngine
-		 * class are persistent - once a force is added it is continually applied each
-		 * APEngine.step() cycle.
+		 * Adds a force to all particles in the system. The mass of the particle is taken into 
+		 * account when using this method, so it is useful for adding forces that simulate effects
+		 * like wind. Particles with larger masses will not be affected as greatly as those with
+		 * smaller masses. Note that the size (not to be confused with mass) of the particle has
+		 * no effect on its physical behavior.
 		 * 
-		 * @param f A IForce object
+		 * @param f A Vector represeting the force added.
 		 */ 
-		public static function addForce(f:IForce):void {
-			forces.push(f);
-		}
-		
-
-		/**
-		 * Removes a force from the engine.
-		 */
-		public static function removeForce(f:IForce):void {
-			var fpos:int = forces.indexOf(f);
-			if (fpos == -1) return;
-			forces.splice(fpos, 1);
+		public static function addForce(v:Vector):void {
+			force.plusEquals(v);
 		}
 		
 		
 		/**
-		 * Removes all forces from the engine.
-		 */
-		public static function removeAllForce():void {
-			forces = new Array();
-		}			
-		
-				
+		 * Adds a 'massless' force to all particles in the system. The mass of the particle is 
+		 * not taken into account when using this method, so it is useful for adding forces that
+		 * simulate effects like gravity. Particles with larger masses will be affected the same
+		 * as those with smaller masses. Note that the size (not to be confused with mass) of 
+		 * the particle has no effect on its physical behavior.
+		 * 
+		 * @param f A Vector represeting the force added.
+		 */ 	
+		public static function addMasslessForce(v:Vector):void {
+			masslessForce.plusEquals(v);
+		}
+			
+			
 		/**
-		 * Adds a Group to the engine.
+		 * 
 		 */
 		public static function addGroup(g:Group):void {
 			groups.push(g);
@@ -227,7 +223,7 @@ package org.cove.ape {
 		
 		
 		/**
-		 * Removes a Group from the engine.
+		 * @private
 		 */
 		public static function removeGroup(g:Group):void {
 			
@@ -260,9 +256,9 @@ package org.cove.ape {
 
 
 		/**
-		 * Calling this method will in turn call each Group's paint() method.
-		 * Generally you would call this method after stepping the engine in
-		 * the main program cycle.
+		 * Calling this method will in turn call each particle and constraint's paint method.
+		 * Generally you would call this method after stepping the engine in the main program
+		 * cycle.
 		 */			
 		public static function paint():void {
 			for (var j:int = 0; j < numGroups; j++) {

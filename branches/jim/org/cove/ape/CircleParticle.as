@@ -20,8 +20,8 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /* 
-TODO:
-- getProjection() needs review for any possibility of precomputing
+	TODO:
+	- getProjection() needs review for any possibility of precomputing
 */
 
 package org.cove.ape {
@@ -124,8 +124,8 @@ package org.cove.ape {
 		 * @private
 		 */
 		internal function getIntervalX():Interval {
-			interval.min = samp.x - _radius;
-			interval.max = samp.x + _radius;
+			interval.min = curr.x - _radius;
+			interval.max = curr.x + _radius;
 			return interval;
 		}
 		
@@ -134,8 +134,8 @@ package org.cove.ape {
 		 * @private
 		 */		
 		internal function getIntervalY():Interval {
-			interval.min = samp.y - _radius;
-			interval.max = samp.y + _radius;
+			interval.min = curr.y - _radius;
+			interval.max = curr.y + _radius;
 			return interval;
 		}
 	}

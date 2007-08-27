@@ -25,7 +25,6 @@ TODO:
 - clear up the difference between speed and angularVelocity
 - can the wheel rotate steadily using speed? angularVelocity causes (unwanted?) acceleration
 */
-
 package org.cove.ape {
 	
 	
@@ -184,7 +183,15 @@ package org.cove.ape {
 		public function get radian():Number {
 			orientation.setTo(rp.curr.x, rp.curr.y);
 			return Math.atan2(orientation.y, orientation.x) + Math.PI;
-		} 
+		}
+		
+		/**
+		 *
+		 */	
+		public function set radian(radianValue:Number):void{
+			rp.curr.x = Math.cos(radianValue) * radius;
+			rp.curr.y = Math.sin(radianValue) * radius;
+		}
 
 
 		/**
@@ -207,10 +214,12 @@ package org.cove.ape {
 		/**
 		 * @private
 		 */		
-		internal override function resolveCollision(mtd:Vector, vel:Vector, n:Vector,
-				d:Number, o:int, p:AbstractParticle):void {
+		public override function resolveCollision(
+				mtd:Vector, vel:Vector, n:Vector, d:Number, o:int, p:AbstractParticle):void {
 			
 			// review the o (order) need here - its a hack fix
+			//trace(vel.magnitude());
+			
 			super.resolveCollision(mtd, vel, n, d, o, p);
 			resolve(n.mult(MathUtil.sign(d * o)));
 		}

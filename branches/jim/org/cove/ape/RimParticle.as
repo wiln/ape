@@ -20,8 +20,8 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /*
-TODO:
-- use vector methods in update()
+	TODO:
+	- use vector methods in update()
 */
 
 package org.cove.ape {
