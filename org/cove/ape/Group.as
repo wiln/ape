@@ -20,21 +20,20 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /*
-TODO:
-- should all getters for composites, particles, constraints arrays return
-  a copy of the array? do we want to give the user direct access to it?
-- addConstraintList, addParticleList
-- if get particles and get constraints returned members of the Groups composites
-  (as they probably should) the checkCollision methods would probably be much
-  cleaner.
-*/
-
+	TODO:
+	- should all getters for composites, particles, constraints arrays return
+	  a copy of the array? do we want to give the user direct access to it?
+	- addConstraintList, addParticleList
+	- if get particles and get constraints returned members of the Groups composites
+	  (as they probably should, the checkCollision... methods would probably be much
+	  cleaner.
+*/ 
 package org.cove.ape {
 	
 	
 	/**
-	 * The Group class can contain Particles, Constraints, and Composites. Groups can be 
-	 * assigned to be checked for collision with other Groups or internally. 
+	 * The Group class can contain Particles, Constraints, and Composites. Groups
+	 * can be assigned to be checked for collision with other Groups or internally. 
 	 */ 
 	public class Group extends AbstractCollection {
 		
@@ -44,10 +43,9 @@ package org.cove.ape {
 		
 		
 		/**
-		 * The Group class is the main organizational class for APE. Once groups are 
-		 * created and populated with particles, constraints, and composites, they are 
-		 * added to the APEngine. Groups may contain particles, constraints, and 
-		 * composites. Composites may only contain particles and constraints.
+		 * The Group class is the main organizational class for APE. Once groups are created and populated 
+		 * with particles, constraints, and composites, they are added to the APEngine. Groups may contain
+		 * particles, constraints, and composites. Composites may only contain particles and constraints.
 		 */
 		public function Group(collideInternal:Boolean = false) {
 			_composites = new Array();
@@ -57,8 +55,8 @@ package org.cove.ape {
 		
 		
 		/**
-		 * Initializes every member of this Group by in turn calling each members 
-		 * <code>init()</code> method.
+		 * Initializes every member of this Group by in turn calling 
+		 * each members <code>init()</code> method.
 		 */
 		public override function init():void {
 			super.init();
@@ -82,9 +80,12 @@ package org.cove.ape {
 		 * @param c The Composite to be added.
 		 */
 		public function addComposite(c:Composite):void {
+			var cpos:int = composites.indexOf(c);
+			if (cpos != -1) return;
 			composites.push(c);
 			c.isParented = true;
-			if (isParented) c.init();
+			c.parent = this;
+			//if (isParented) c.init();
 		}
 
 
@@ -93,25 +94,27 @@ package org.cove.ape {
 		 * 
 		 * @param c The Composite to be removed.
 		 */
-		public function removeComposite(c:Composite):void {
+		public function removeComposite(c:Composite):Boolean {
 			var cpos:int = composites.indexOf(c);
-			if (cpos == -1) return;
+			if (cpos == -1) return false;
 			composites.splice(cpos, 1);
 			c.isParented = false;
 			c.cleanup();
+			c.parent = undefined;
+			return true;
 		}
 		
 
 		/**
-		 * Paints all members of this Group. This method is called automatically by the 
-		 * APEngine class.
+		 * Paints all members of this Group. This method is called automatically
+		 * by the APEngine class.
 		 */
 		public override function paint():void {
 
 			super.paint();
 		
-			var len:int = _composites.length;
-			for (var i:int = 0; i < len; i++) {
+			//var len:int = _composites.length;
+			for (var i:int = 0; i < _composites.length; i++) {
 				var c:Composite = _composites[i];
 				c.paint();
 			}						
@@ -119,7 +122,8 @@ package org.cove.ape {
 
 
 		/**
-		 * Adds an Group instance to be checked for collision against this one.
+		 * Adds an Group instance to be checked for collision against
+		 * this one.
 		 */
 		public function addCollidable(g:Group):void {
 			 collisionList.push(g);
@@ -149,7 +153,8 @@ package org.cove.ape {
 		
 		
 		/**
-		 * Returns the array of every Group assigned to collide with this Group instance.
+		 * Returns the array of every Group assigned to collide with 
+		 * this Group instance.
 		 */
 		public function get collisionList():Array {
 			return _collisionList;
@@ -157,8 +162,7 @@ package org.cove.ape {
 	
 
 		/**
-		 * Returns an array of every particle, constraint, and composite added to the 
-		 * Group.
+		 * Returns an array of every particle, constraint, and composite added to the Group.
 		 */
 		public override function getAll():Array {
 			return particles.concat(constraints).concat(composites);
@@ -166,8 +170,8 @@ package org.cove.ape {
 
 						
 		/**
-		 * Determines if the members of this Group are checked for collision with one 
-		 * another.
+		 * Determines if the members of this Group are checked for
+		 * collision with one another.
 		 */
 		public function get collideInternal():Boolean {
 			return _collideInternal;
@@ -183,8 +187,8 @@ package org.cove.ape {
 		
 		
 		/**
-		 * Calls the <code>cleanup()</code> method of every member of this Group.The 
-		 * <code>cleanup()</code> method is called automatically when an Group is removed
+		 * Calls the <code>cleanup()</code> method of every member of this Group.
+		 * The cleanup() method is called automatically when an Group is removed
 		 * from the APEngine.
 		 */
 		public override function cleanup():void {
@@ -202,8 +206,8 @@ package org.cove.ape {
 			
 			super.integrate(dt2);
 		
-			var len:int = _composites.length;
-			for (var i:int = 0; i < len; i++) {
+			//var len:int = _composites.length;
+			for (var i:int = 0; i < _composites.length; i++) {
 				var cmp:Composite = _composites[i];
 				cmp.integrate(dt2);
 			}						
@@ -214,11 +218,9 @@ package org.cove.ape {
 		 * @private
 		 */
 		internal override function satisfyConstraints():void {
-			
 			super.satisfyConstraints();
-		
-			var len:int = _composites.length;
-			for (var i:int = 0; i < len; i++) {
+			
+			for (var i:int = 0; i < _composites.length; i++) {
 				var cmp:Composite = _composites[i];
 				cmp.satisfyConstraints();
 			}				
@@ -232,10 +234,9 @@ package org.cove.ape {
 			
 			if (collideInternal) checkCollisionGroupInternal();
 			
-			var len:int = collisionList.length;
-			for (var i:int = 0; i < len; i++) {
+			//var len:int = collisionList.length;
+			for (var i:int = 0; i < collisionList.length; i++) {
 				var g:Group = collisionList[i];
-				if (g == null) continue;
 				checkCollisionVsGroup(g);
 			}
 		}
@@ -247,19 +248,18 @@ package org.cove.ape {
 			checkInternalCollisions();
 			
 			// for every composite in this Group..
-			var clen:int = _composites.length;
-			for (var j:int = 0; j < clen; j++) {
+			//var clen:int = _composites.length;
+			for (var j:int = 0; j < _composites.length; j++) {
 				
 				var ca:Composite = _composites[j];
-				if (ca == null) continue;
 				
 				// .. vs non composite particles and constraints in this group
 				ca.checkCollisionsVsCollection(this);
 				
 				// ...vs every other composite in this Group
-				for (var i:int = j + 1; i < clen; i++) {
+				for (var i:int = j + 1; i < _composites.length; i++) {
 					var cb:Composite = _composites[i];
-					if (cb != null) ca.checkCollisionsVsCollection(cb);
+					ca.checkCollisionsVsCollection(cb);
 				}
 			}
 		}
@@ -270,30 +270,26 @@ package org.cove.ape {
 			// check particles and constraints not in composites of either group
 			checkCollisionsVsCollection(g);
 			
-			var gc:Composite;
-			var clen:int = _composites.length;
-			var gclen:int = g.composites.length;
+			//var clen:int = _composites.length;
+			//var gclen:int = g.composites.length;
 			
 			// for every composite in this group..
-			for (var i:int = 0; i < clen; i++) {
+			for (var i:int = 0; i < _composites.length; i++) {
 			
 				// check vs the particles and constraints of g
 				var c:Composite = _composites[i];
-				if (c == null) continue;
 				c.checkCollisionsVsCollection(g);
 				
 				// check vs composites of g
-				for (var j:int = 0; j < gclen; j++) {
-					gc = g.composites[j];
-					if (gc == null) continue;
+				for (var j:int = 0; j < g.composites.length; j++) {
+					var gc:Composite = g.composites[j];
 					c.checkCollisionsVsCollection(gc);
 				}
 			}
 			
 			// check particles and constraints of this group vs the composites of g
-			for (j = 0; j < gclen; j++) {
-				gc = g.composites[j];
-				if (gc == null) continue;	
+			for (j = 0; j < g.composites.length; j++) {
+				gc = g.composites[j];	
 				checkCollisionsVsCollection(gc);
 			}
 		}

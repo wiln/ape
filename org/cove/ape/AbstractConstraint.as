@@ -19,10 +19,6 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFT
 OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-/*
-TODO:
-*/
-
 package org.cove.ape {
 	
 	import flash.display.Sprite;
@@ -39,7 +35,7 @@ package org.cove.ape {
 	public class AbstractConstraint extends AbstractItem {
 		
 		private var _stiffness:Number;
-		
+		private var _collidable:Boolean;		
 
 		/** 
 		 * @private
@@ -72,8 +68,7 @@ package org.cove.ape {
 		
 		
 		/**
-		 * Corrects the position of the attached particles based on their position and
-		 * mass. This method is called automatically during the APEngine.step() cycle.
+		 * @private
 		 */					
 		public function resolve():void {}
 	}

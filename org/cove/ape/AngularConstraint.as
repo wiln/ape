@@ -1,33 +1,3 @@
-/*
-Copyright (c) 2006, 2007 Alec Cove
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this 
-software and associated documentation files (the "Software"), to deal in the Software 
-without restriction, including without limitation the rights to use, copy, modify, 
-merge, publish, distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject to the following 
-conditions:
-
-The above copyright notice and this permission notice shall be included in all copies 
-or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
-PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT 
-HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
-OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
-
-/*
-	TODO:
-	- tearable, tearLength
-	- consider breaking the collidable (vs non collidable) functionality into another class
-	- get/set collidable, currently it is only get
-	- see if radian, angle, and center can be more efficient
-	- do we need a scaleToLength for non collidable?
-	- resolveCycles
-*/
 package org.cove.ape {
 	
 	import flash.display.Sprite;
@@ -37,41 +7,34 @@ package org.cove.ape {
 	import flash.events.IEventDispatcher;
 	
 	/**
-	 * A Spring-like constraint that connects two particles
+	 * An Angular Constraint between 3 particles
 	 */
-	public class SpringConstraint extends AbstractConstraint {
+	public class AngularConstraint extends AbstractConstraint{
 		
 		private var _p1:AbstractParticle;
-		private var _p2:AbstractParticle;	
+		private var _p2:AbstractParticle;
+		private var _p3:AbstractParticle;
+		
+		private var _minAng:Number;
+		private var _maxAng:Number;
+		private var _minBreakAng:Number;
+		private var _maxBreakAng:Number;
 	
 		private var _restLength:Number;
 		private var _collidable:Boolean;
-		private var _breakable:Boolean;
-		private var _broken:Boolean;
 		private var _scp:SpringConstraintParticle;
 		
-		private var _breakRatio:Number;
-		private var _breakLength:Number;
+		private var _broken:Boolean;
 		
-		/**
-		 * @param p1 The first particle this constraint is connected to.
-		 * @param p2 The second particle this constraint is connected to.
-		 * @param stiffness The strength of the spring. Valid values are between 0 and 1. Lower values
-		 * result in softer springs. Higher values result in stiffer, stronger springs.
-		 * @param collidable Determines if the constraint will be checked for collision
-		 * @param rectHeight If the constraint is collidable, the height of the collidable area
-		 * can be set in pixels. The height is perpendicular to the two attached particles.
-		 * @param rectScale If the constraint is collidable, the scale of the collidable area
-		 * can be set in value from 0 to 1. The scale is percentage of the distance between 
-		 * the the two attached particles.
-		 * @param scaleToLength If the constraint is collidable and this value is true, the 
-		 * collidable area will scale based on changes in the distance of the two particles. 
-		 */
-		public function SpringConstraint(
+		public function AngularConstraint(
 				p1:AbstractParticle, 
-				p2:AbstractParticle, 
-				stiffness:Number = 0.5,
-				breakable:Boolean = false,
+				p2:AbstractParticle,
+				p3:AbstractParticle,
+				minAng:Number,
+				maxAng:Number,
+				minBreakAng:Number = -10,
+				maxBreakAng:Number = 10,
+				stiffness:Number = .5,
 				collidable:Boolean = false,
 				rectHeight:Number = 1,
 				rectScale:Number = 1,
@@ -81,11 +44,45 @@ package org.cove.ape {
 			
 			this.p1 = p1;
 			this.p2 = p2;
+			this.p3 = p3;
 			checkParticlesLocation();
 			
+			if(minAng == 10){
+				this.minAng = acRadian;
+				this.maxAng = acRadian;
+			}else{
+				this.minAng = minAng;
+				this.maxAng = maxAng;
+			}
+			this.minBreakAng = minBreakAng;
+			this.maxBreakAng = maxBreakAng;
+			
 			_restLength = currLength;
-			_breakable = breakable;
 			setCollidable(collidable, rectHeight, rectScale, scaleToLength);
+		}
+		
+		public function get p1():AbstractParticle{
+			return _p1;
+		}
+		
+		public function set p1(p:AbstractParticle){
+			_p1 = p;
+		}
+		
+		public function get p2():AbstractParticle{
+			return _p2;
+		}
+		
+		public function set p2(p:AbstractParticle){
+			_p2 = p;
+		}
+		
+		public function get p3():AbstractParticle{
+			return _p3;
+		}
+		
+		public function set p3(p:AbstractParticle){
+			_p3 = p;
 		}
 		
 		
@@ -123,6 +120,14 @@ package org.cove.ape {
 		 */			
 		public function get center():Vector {
 			return (p1.curr.plus(p2.curr)).divEquals(2);
+		}
+		
+		public function get acRadian():Number{
+			var ang12:Number = Math.atan2(p2.curr.y - p1.curr.y, p2.curr.x - p1.curr.x);
+			var ang23:Number = Math.atan2(p3.curr.y - p2.curr.y, p3.curr.x - p2.curr.x);
+			
+			var angDiff:Number = ang12 - ang23;
+			return angDiff;
 		}
 		
 		
@@ -205,31 +210,6 @@ package org.cove.ape {
 			return _collidable;
 		}
 		
-		public function set breakable(b:Boolean):void {
-			_breakable = b;
-		}
-		
-		public function get breakable():Boolean {
-			return _breakable;
-		}
-		
-		public function get breakRatio():Number {
-			return _breakRatio;
-		}
-		
-		public function set breakRatio(r:Number):void {
-			if (r <= 0) throw new ArgumentError("breakRatio must be greater than 0");
-			_breakRatio = r;
-			_breakLength = _restLength * _breakRatio;
-		}
-		
-		public function get broken():Boolean{
-			return _broken;
-		}
-		
-		public function set broken(b:Boolean):void{
-			_broken = b;
-		}		
 		
 		/**
 		 * For cases when the SpringConstraint is <code>collidable</code> and only one of the
@@ -261,16 +241,16 @@ package org.cove.ape {
 			_scp = null;
 			
 			if (_collidable) {
-				_scp = new SpringConstraintParticle(p1, p2, this, rectHeight, rectScale, scaleToLength);			
+				//_scp = new SpringConstraintParticle(p1, p2, this, rectHeight, rectScale, scaleToLength);			
 			}
 		}
 		
 		
 		/**
-		 * Returns true if the passed particle is one of the two particles attached to this SpringConstraint.
+		 * Returns true if the passed particle is one of the two particles attached to this AngularConstraint.
 		 */		
 		public function isConnectedTo(p:AbstractParticle):Boolean {
-			return (p == p1 || p == p2);
+			return (p == p1 || p == p2 || p == p3);
 		}
 		
 		
@@ -278,7 +258,47 @@ package org.cove.ape {
 		 * Returns true if both connected particle's <code>fixed</code> property is true.
 		 */
 		public function get fixed():Boolean {
-			return (p1.fixed && p2.fixed);
+			return (p1.fixed && p2.fixed && p3.fixed);
+		}
+		
+		public function get minAng():Number{
+			return _minAng;
+		}
+		
+		public function set minAng(n:Number):void{
+			_minAng = n;
+		}
+		
+		public function get maxAng():Number{
+			return _maxAng;
+		}
+		
+		public function set maxAng(n:Number):void{
+			_maxAng = n;
+		}
+		
+		public function get minBreakAng():Number{
+			return _minBreakAng;
+		}
+		
+		public function set minBreakAng(n:Number):void{
+			_minBreakAng = n;
+		}
+		
+		public function get maxBreakAng():Number{
+			return _maxBreakAng;
+		}
+		
+		public function set maxBreakAng(n:Number):void{
+			_maxBreakAng = n;
+		}
+		
+		public function get broken():Boolean{
+			return _broken;
+		}
+		
+		public function set broken(b:Boolean):void{
+			_broken = b;
 		}
 		
 		
@@ -317,7 +337,7 @@ package org.cove.ape {
 				sprite.graphics.clear();
 				sprite.graphics.lineStyle(lineThickness, lineColor, lineAlpha);
 				sprite.graphics.moveTo(p1.px, p1.py);
-				sprite.graphics.lineTo(p2.px, p2.py);	
+				sprite.graphics.lineTo(p2.px, p2.py);
 			}
 		}
 		
@@ -368,41 +388,63 @@ package org.cove.ape {
 			return _scp;
 		}
 		
-		
 		/**
 		 * @private
-		 */			
+		 */
 		public override function resolve():void {
+			if (broken) return;
 			
-			if (p1.fixed && p2.fixed || _broken) return;
+			var PI2:Number = Math.PI*2;
 			
-			var deltaLength:Number = currLength;
-			if(this._breakable){
-				if(_breakLength > _restLength){
-					if(deltaLength > _breakLength){
-						broken = true;
-						if(this.hasEventListener(BreakEvent.LENGTH)){
-							var difference1:Number = _breakLength - deltaLength;
-							dispatchEvent(new BreakEvent(BreakEvent.LENGTH, difference1));
-						}
-						return;
+			var ang12:Number = Math.atan2(p2.curr.y - p1.curr.y, p2.curr.x - p1.curr.x);
+			var ang23:Number = Math.atan2(p3.curr.y - p2.curr.y, p3.curr.x - p2.curr.x);
+			
+			var angDiff:Number = ang12 - ang23;
+			while (angDiff > Math.PI) angDiff -= PI2;
+			while (angDiff < -Math.PI) angDiff += PI2;
+			
+			var sumInvMass:Number = p1.invMass + p2.invMass;
+			var mult1:Number = p1.invMass/sumInvMass;
+			var mult2:Number = p2.invMass/sumInvMass;
+			var angChange:Number = 0;
+			
+			var lowMid:Number = (maxAng - minAng) / 2;
+			var highMid:Number = (maxAng + minAng) / 2;
+     		var breakAng:Number = (maxBreakAng - minBreakAng)/2;
+			
+     		var newDiff:Number = highMid - angDiff;
+			while (newDiff > Math.PI) newDiff -= PI2;
+			while (newDiff < -Math.PI) newDiff += PI2;
+			
+			if (newDiff > lowMid){
+				if(newDiff > breakAng){
+					var diff = newDiff - breakAng;
+					broken = true;
+					if(hasEventListener(BreakEvent.ANGULAR)){
+						dispatchEvent(new BreakEvent(BreakEvent.ANGULAR, diff));
 					}
-				}else{
-					if(deltaLength < _breakLength){
-						broken = true;
-						if(this.hasEventListener(BreakEvent.LENGTH)){
-							var difference2:Number = _breakLength - deltaLength;
-							dispatchEvent(new BreakEvent(BreakEvent.LENGTH, difference2));
-						}
-						return;
-					}
+					return;
 				}
+				angChange = newDiff - lowMid;
+			}else if (newDiff < -lowMid){
+				if(newDiff < - breakAng){
+					var diff2 = newDiff + breakAng;
+					broken = true;
+					if(hasEventListener(BreakEvent.ANGULAR)){
+						dispatchEvent(new BreakEvent(BreakEvent.ANGULAR, diff2));
+					}
+					return;
+				}
+				angChange = newDiff + lowMid;
 			}
-			var diff:Number = (deltaLength - restLength) / (deltaLength * (p1.invMass + p2.invMass));
-			var dmds:Vector = delta.mult(diff * stiffness);
-		
-			p1.curr.minusEquals(dmds.mult(p1.invMass));
-			p2.curr.plusEquals (dmds.mult(p2.invMass));
+			
+			var finalAng:Number = angChange * this.stiffness + ang12;
+			var displaceX:Number = p1.curr.x + (p2.curr.x - p1.curr.x) * mult1;
+			var displaceY:Number = p1.curr.y + (p2.curr.y - p1.curr.y) * mult1;
+    		p1.curr.x = displaceX + Math.cos(finalAng + Math.PI) * _restLength * mult1;
+    		p1.curr.y = displaceY + Math.sin(finalAng + Math.PI) * _restLength * mult1;
+			p2.curr.x = displaceX + Math.cos(finalAng) * _restLength * mult2;
+			p2.curr.y = displaceY + Math.sin(finalAng) * _restLength * mult2;	
 		}
 		
 		
@@ -413,22 +455,6 @@ package org.cove.ape {
 			if (p1.curr.x == p2.curr.x && p1.curr.y == p2.curr.y) {
 				p2.curr.x += 0.0001;
 			}
-		}
-		
-		public function get p1():AbstractParticle{
-			return _p1;
-		}
-		
-		public function set p1(p:AbstractParticle):void{
-			_p1 = p;
-		}
-		
-		public function get p2():AbstractParticle{
-			return _p2;
-		}
-		
-		public function set p2(p:AbstractParticle):void{
-			_p2 = p;
 		}
 	}
 }

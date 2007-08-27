@@ -20,11 +20,11 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /* 
-TODO:
-- Need removeForces method(s)
-- Center and Position are the same, needs review. Also the comments need review.
-- Should have alwaysRepaint functionality for Constraints, and bump up to AbstractItem
-- See if there's anywhere where Vectors can be downgraded to simple Point classes
+	TODO:
+	- Need removeForces method(s)
+	- Center and Position are the same, needs review.
+	- Should have alwaysRepaint functionality for Constraints, and bump up to AbstractItem
+	- See if there's anywhere where Vectors can be downgraded to simple Point classes
 */
 
 package org.cove.ape {
@@ -52,12 +52,12 @@ package org.cove.ape {
 		/** @private */
 		internal var interval:Interval;
 		
-		private var temp:Vector;
 		private var forces:Vector;
-		private var forceList:Array;
+		private var temp:Vector;
 		private var collision:Collision;
-		private var firstCollision:Boolean;
-				
+		
+		private var _parent:AbstractCollection;
+		
 		private var _kfr:Number;
 		private var _mass:Number;
 		private var _invMass:Number;
@@ -66,9 +66,15 @@ package org.cove.ape {
 		private var _fixed:Boolean;
 		private var _collidable:Boolean;
 		
+		private var _pinned:Boolean;
+		private var _pinnedTo:AbstractParticle;
+		private var _pin:Vector;
+		
 		private var _center:Vector;
 		private var _multisample:int;
-			
+		
+		private var _smashable:Boolean;
+		private var _maxExitVelocity:Number;
 		
 		/** 
 		 * @private
@@ -94,11 +100,8 @@ package org.cove.ape {
 			fixed = isFixed;
 			
 			forces = new Vector();
-			forceList = new Array();
-			
 			collision = new Collision(new Vector(), new Vector());
 			collidable = true;
-			firstCollision = false;
 			
 			this.mass = mass;
 			this.elasticity = elasticity;
@@ -163,33 +166,9 @@ package org.cove.ape {
 		
 
 		/**
-		 * Determines the number of intermediate position steps during each collision test.
-		 * Setting this number higher on fast moving particles can prevent 'tunneling' 
-		 * -- when a particle moves so fast it misses collision with another particle.
-		 * 
-		 * <p>
-		 * If two particles both have multisample levels greater than 0 then their 
-		 * multisample levels must be equal to be tested correctly. For example, if one 
-		 * particle has a multisample level of 4 and another has a multisample level of 5
-		 * then the two particles will not be tested for multisampled collision. This is
-		 * due to the unequal amount of steps in the collision test. 
-		 * </p>
-		 * 
-		 * <p>
-		 * Multisampling is currently buggy and should only be applied to particles that
-		 * have high velocity. You can selectively apply multisampling by doing something
-		 * like: 
-		 * </p>
-		 * 
-		 * <p>
-		 * <code>
-		 * if (myparticle.velocity.magnitude() > 20) {
-		 *     myparticle.multisample = 100;
-		 * } else {
-		 *     myparticle.multsample = 0;
-		 * }
-		 * </code>
-		 * </p>
+		 * Determines the number of intermediate position steps checked for collision each
+		 * cycle. Setting this number higher on fast moving particles can prevent 'tunneling'
+		 * -- when a particle moves so fast it misses collision with certain surfaces.
 		 */ 
 		public function get multisample():int {
 			return _multisample; 
@@ -221,19 +200,22 @@ package org.cove.ape {
 		 * </p>
 		 * 
 		 * <p>
-		 * During collisions, the friction values are summed, but are clamped between 1 
-		 * and 0. For example, If two particles have 0.7 as their surface friction, then
-		 * the resulting friction between the two particles will be 1 (full friction).
+		 * During collisions, the friction values are summed, but are clamped between 1 and 0.
+		 * For example, If two particles have 0.7 as their surface friction, then the resulting
+		 * friction between the two particles will be 1 (full friction).
+		 * </p>
+		 * 
+		 * <p>
+		 * In the current release, only dynamic friction is calculated. Static friction
+		 * is planned for a later release.
 		 * </p>
 		 *
 		 * <p>
-		 * There is a bug in the current release where colliding non-fixed particles with
-		 * friction greater than 0 will behave erratically. A workaround is to only set 
-		 * the friction of fixed particles.
+		 * There is a bug in the current release where colliding non-fixed particles with friction
+		 * greater than 0 will behave erratically. A workaround is to only set the friction of
+		 * fixed particles.
 		 * </p>
-		 * 
-		 * @throws ArgumentError ArgumentError if the friction is set less than zero or 
-		 * greater than 1
+		 * @throws ArgumentError ArgumentError if the friction is set less than zero or greater than 1
 		 */	
 		public function get friction():Number {
 			return _friction; 
@@ -244,16 +226,14 @@ package org.cove.ape {
 		 * @private
 		 */
 		public function set friction(f:Number):void {
-			if (f < 0 || f > 1)  {
-				throw new ArgumentError("Legal friction must be >= 0 and <=1");
-			}
+			if (f < 0 || f > 1) throw new ArgumentError("Legal friction must be >= 0 and <=1");
 			_friction = f;
 		}
 		
 		
 		/**
-		 * The fixed state of the particle. If the particle is fixed, it does not move in
-		 * response to forces or collisions. Fixed particles are good for surfaces.
+		 * The fixed state of the particle. If the particle is fixed, it does not move
+		 * in response to forces or collisions. Fixed particles are good for surfaces.
 		 */
 		public function get fixed():Boolean {
 			return _fixed;
@@ -267,26 +247,50 @@ package org.cove.ape {
 			_fixed = f;
 		}
 		
+		/**
+		 * pinning functions
+		 */		
+		public function get pinned():Boolean {
+			return _pinned;
+		}
+		
+		public function set pinned(b:Boolean):void {
+			_pinned = false;
+			_pinnedTo = null;
+			_pin = null;
+		}
+		
+		public function get pinnedTo():AbstractParticle {
+			return _pinnedTo;
+		}
+		
+		public function pinTo(p:AbstractParticle, v:Vector){
+			_pinnedTo = p;
+			_pin = v;
+			_pinned = true;
+		}
+		
+		public function get pin():Vector{
+			return _pin;
+		}		
 		
 		/**
 		 * The position of the particle. Getting the position of the particle is useful
 		 * for drawing it or testing it for some custom purpose. 
 		 * 
 		 * <p>
-		 * When you get the <code>position</code> of a particle you are given a copy of 
-		 * the current location. Because of this you cannot change the position of a 
-		 * particle by altering the <code>x</code> and <code>y</code> components of the 
-		 * Vector you have retrieved from the position property. You have to do something
-		 * instead like: <code> position = new Vector(100,100)</code>, or you can use the
-		 * <code>px</code> and <code>py</code> properties instead.
+		 * When you get the <code>position</code> of a particle you are given a copy of the current
+		 * location. Because of this you cannot change the position of a particle by
+		 * altering the <code>x</code> and <code>y</code> components of the Vector you have retrieved from the position property.
+		 * You have to do something instead like: <code> position = new Vector(100,100)</code>, or
+		 * you can use the <code>px</code> and <code>py</code> properties instead.
 		 * </p>
 		 * 
 		 * <p>
 		 * You can alter the position of a particle three ways: change its position, set
-		 * its velocity, or apply a force to it. Setting the position of a non-fixed 
-		 * particle is not the same as setting its fixed property to true. A particle held
-		 * in place by its position will behave as if it's attached there by a 0 length
-		 * spring constraint. 
+		 * its velocity, or apply a force to it. Setting the position of a non-fixed particle
+		 * is not the same as setting its fixed property to true. A particle held in place by 
+		 * its position will behave as if it's attached there by a 0 length spring constraint. 
 		 * </p>
 		 */
 		public function get position():Vector {
@@ -302,7 +306,7 @@ package org.cove.ape {
 			prev.copy(p);
 		}
 
-
+	
 		/**
 		 * The x position of this particle
 		 */
@@ -310,7 +314,7 @@ package org.cove.ape {
 			return curr.x;
 		}
 
-
+		
 		/**
 		 * @private
 		 */
@@ -336,13 +340,40 @@ package org.cove.ape {
 			prev.y = y;	
 		}
 		
+		/**
+		 * @private  Added these for changeability to just the current coordinates to retain momentum
+		 */
+		public function set currX(x:Number):void {
+			curr.x = x;
+		}
 		
+		/**
+		 * The x position of this particle
+		 */
+		public function get currX():Number {
+			return curr.x;
+		}
+		
+		/**
+		 * @private
+		 */
+		public function set currY(y:Number):void {
+			curr.y = y;
+		}
+		
+		/**
+		 * The y position of this particle
+		 */
+		public function get currY():Number {
+			return curr.y;
+		}
+
+
 		/**
 		 * The velocity of the particle. If you need to change the motion of a particle, 
 		 * you should either use this property, or one of the addForce methods. Generally,
-		 * the addForce methods are best for slowly altering the motion. The velocity 
-		 * property is good for instantaneously setting the velocity, e.g., for 
-		 * projectiles.
+		 * the addForce methods are best for slowly altering the motion. The velocity property
+		 * is good for instantaneously setting the velocity, e.g., for projectiles.
 		 * 
 		 */
 		public function get velocity():Vector {
@@ -375,12 +406,27 @@ package org.cove.ape {
 		}
 		
 		
+		public function get smashable():Boolean {
+			return _smashable;
+		}
+		
+		public function set smashable(b:Boolean):void {
+			_smashable = b;
+		}
+		
+		public function get maxExitVelocity():Number {
+			return _maxExitVelocity;
+		}
+		
+		public function set maxExitVelocity(n:Number):void {
+			_maxExitVelocity = n;
+		}
+		
+		
 		/**
 		 * Assigns a DisplayObject to be used when painting this particle.
 		 */ 
-		public function setDisplay(d:DisplayObject, offsetX:Number=0, offsetY:Number=0,
-				 rotation:Number=0):void {
-			
+		public function setDisplay(d:DisplayObject, offsetX:Number=0, offsetY:Number=0, rotation:Number=0):void {
 			displayObject = d;
 			displayObjectRotation = rotation;
 			displayObjectOffset = new Vector(offsetX, offsetY);
@@ -388,41 +434,60 @@ package org.cove.ape {
 		
 		
 		/**
-		 * Adds a force to the particle. Using this method to a force directly to the
-		 * particle will only apply that force for a single APEngine.step() cycle. 
+		 * Adds a force to the particle. The mass of the particle is taken into 
+		 * account when using this method, so it is useful for adding forces 
+		 * that simulate effects like wind. Particles with larger masses will
+		 * not be affected as greatly as those with smaller masses. Note that the
+		 * size (not to be confused with mass) of the particle has no effect 
+		 * on its physical behavior with respect to forces.
 		 * 
-		 * @param f An IForce object.
+		 * @param f A Vector represeting the force added.
 		 */ 
-		 public function addForce(f:IForce):void {
-		 	forceList.push(f);
-		 }
+		public function addForce(f:Vector):void {
+			forces.plusEquals(f.mult(invMass));
+		}
 		
-	
+		
+		/**
+		 * Adds a 'massless' force to the particle. The mass of the particle is 
+		 * not taken into account when using this method, so it is useful for
+		 * adding forces that simulate effects like gravity. Particles with 
+		 * larger masses will be affected the same as those with smaller masses.
+		 *
+		 * @param f A Vector represeting the force added.
+		 */ 	
+		public function addMasslessForce(f:Vector):void {
+			forces.plusEquals(f);
+		}
+		
+			
 		/**
 		 * The <code>update()</code> method is called automatically during the
 		 * APEngine.step() cycle. This method integrates the particle.
 		 */
 		public function update(dt2:Number):void {
 			
+			if(_pinned){
+				position = _pinnedTo.curr.plus(_pin);
+				//prev = _pinnedTo.prev.plus(_pin);
+				return;
+			}	
+			
 			if (fixed) return;
 			
-			accumulateForces();
+			// global forces
+			addForce(APEngine.force);
+			addMasslessForce(APEngine.masslessForce);
 	
-			temp.copy(curr);			
+			// integrate
+			temp.copy(curr);
+			
 			var nv:Vector = velocity.plus(forces.multEquals(dt2));
 			curr.plusEquals(nv.multEquals(APEngine.damping));
 			prev.copy(temp);
 
-			clearForces();
-		}
-		
-		
-		/**
-		 * Resets the collision state of the particle. This value is used in conjuction
-		 * with the CollisionEvent.FIRST_COLLISION event.
-		 */	
-		public function resetFirstCollision():void {
-			firstCollision = false;
+			// clear the forces
+			forces.setTo(0,0);
 		}
 		
 		
@@ -451,40 +516,24 @@ package org.cove.ape {
 	
 		/**
 		 * @private
-		 * 
-		 * Make sure to align  the overriden versions of this method in
-		 * WheelParticle
 		 */	
-		internal function resolveCollision(mtd:Vector, vel:Vector, n:Vector, d:Number,
-				o:int, p:AbstractParticle):void {
-					
-			testParticleEvents(p);
-			if (fixed || (! solid) || (! p.solid)) return;
+		public function resolveCollision(
+				mtd:Vector, vel:Vector, n:Vector, d:Number, o:int, p:AbstractParticle):void {
 			
-			curr.copy(samp);
-			curr.plusEquals(mtd);
-			velocity = vel;
-		}
-		
-		
-		/**
-		 * @private
-		 */		
-		internal function testParticleEvents(p:AbstractParticle):void {		
-			
-			if (hasEventListener(CollisionEvent.COLLIDE)) {
-				dispatchEvent(new CollisionEvent(
-						CollisionEvent.COLLIDE, false, false, p));
+			if(!_fixed){
+				curr.plusEquals(mtd);
+				velocity = vel;
 			}
 			
-			if (hasEventListener(CollisionEvent.FIRST_COLLIDE) && ! firstCollision) {
-				firstCollision = true;
-				dispatchEvent(new CollisionEvent(
-						CollisionEvent.FIRST_COLLIDE, false, false, p));
+			if(smashable){
+				var ev:Number = vel.magnitude();
+				if(ev > _maxExitVelocity){
+					dispatchEvent(new SmashEvent(SmashEvent.COLLISION, ev));
+				}
 			}
 		}
 		
-			
+		
 		/**
 		 * @private
 		 */		
@@ -492,35 +541,12 @@ package org.cove.ape {
 			return (fixed) ? 0 : _invMass; 
 		}
 		
-		
-		/**
-		 * Accumulates both the particle forces and the global forces
-		 */
-		private function accumulateForces():void {
-			
-			var f:IForce;
-			
-			var len:int = forceList.length;
-			for (var i:int = 0; i < len; i++) {
-				f = forceList[i];
-				forces.plusEquals(f.getValue(_invMass));
-			}
-			
-			var globalForces:Array = APEngine.forces;
-			len = globalForces.length;
-			for (i = 0; i < len; i++) {
-				f = globalForces[i];
-				forces.plusEquals(f.getValue(_invMass));
-			}
+		public function get parent():AbstractCollection{
+			return _parent;
 		}
 		
-		
-		/**
-		 * Clears out all forces on the particle
-		 */
-		private function clearForces():void {
-			forceList.length = 0;
-			forces.setTo(0,0);
+		public function set parent(ac:AbstractCollection){
+			_parent = ac;
 		}
 	}	
 }

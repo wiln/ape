@@ -20,25 +20,27 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /*
-TODO:
+	TODO:
 */
 
 package org.cove.ape {
 	
 	import flash.display.Sprite;
 	import flash.display.DisplayObject;
+	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	import flash.events.IEventDispatcher;
 	
 	/** 
 	 * The base class for all constraints and particles
 	 */
-	public class AbstractItem extends EventDispatcher {
+	public class AbstractItem implements IEventDispatcher{
 		
 		private var _sprite:Sprite;
-		
-		private var _solid:Boolean;
 		private var _visible:Boolean;
 		private var _alwaysRepaint:Boolean;
+		
+		public var dispatcher:EventDispatcher;
 		
 	
 		/** @private */
@@ -60,9 +62,9 @@ package org.cove.ape {
 		
 		
 		public function AbstractItem() {
-			_solid = true;
 			_visible = true;	
 			_alwaysRepaint = false;
+			dispatcher = new EventDispatcher(this);
 		}
 		
 		
@@ -132,38 +134,6 @@ package org.cove.ape {
 
 
 		/**
-		 * Sets the solidity of the item. If an item is not solid, then other items colliding
-		 * with it will not respond to the collision. This property differs from 
-		 * <code>collidable</code> in that you can still test for collision events if
-		 * an item's <code>collidable</code> property is true and its <code>solid</code>
-		 * property is false. 
-		 * 
-		 * <p>
-		 * The <code>collidable</code> property takes precidence over the <code>solid</code>
-		 * property if <code>collidable</code> is set to false. That is, if <code>collidable</code>
-		 * is false, it won't matter if <code>solid</code> is set to true or false.
-		 * </p>
-		 * 
-		 * <p>
-		 * If you don't need to check for collision events, using <code>collidable</code>
-		 * is much more efficient. Always use <code>collidable</code> unless you need to
-		 * handle collision events.
-		 * </p>
-		 */	
-		public function get solid():Boolean {
-			return _solid;
-		}
-		
-		
-		/**
-		 * @private
-		 */			
-		public function set solid(s:Boolean):void {
-			_solid = s;
-		}
-
-
-		/**
 		 * Sets the line and fill of this Item.
 		 */ 		
 		public function setStyle(
@@ -210,6 +180,30 @@ package org.cove.ape {
 			_sprite = new Sprite();
 			APEngine.container.addChild(_sprite);
 			return _sprite;
-		}	
+		}
+		
+		/**
+		 * Event dispatcher functions
+		 */
+		 
+		public function addEventListener(type:String, listener:Function, useCapture:Boolean = false, priority:int = 0, useWeakReference:Boolean = false):void{
+			dispatcher.addEventListener(type, listener, useCapture, priority);
+		}
+           
+		public function dispatchEvent(evt:Event):Boolean{
+			return dispatcher.dispatchEvent(evt);
+		}
+    
+		public function hasEventListener(type:String):Boolean{
+			return dispatcher.hasEventListener(type);
+		}
+		
+		public function removeEventListener(type:String, listener:Function, useCapture:Boolean = false):void{
+			dispatcher.removeEventListener(type, listener, useCapture);
+		}
+		
+		public function willTrigger(type:String):Boolean {
+			return dispatcher.willTrigger(type);
+		}
 	}
 }

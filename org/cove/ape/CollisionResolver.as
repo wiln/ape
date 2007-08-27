@@ -20,33 +20,39 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /*
-TODO:
-- fix the friction bug for two non-fixed particles in collision. The tangental
-  component should not be scaled/applied in all instances, depending on the velocity
-  of the other colliding item
-*/
-
+	TODO:
+	- fix the friction bug for two non-fixed particles in collision. The tangental
+	  component should not be scaled/applied in all instances, depending on the velocity
+	  of the other colliding item
+*/ 
 package org.cove.ape {
 	
 	// thanks to Jim Bonacci for changes using the inverse mass instead of mass
 	
 	internal final class CollisionResolver {
         
-        internal static function resolve (pa:AbstractParticle, pb:AbstractParticle, 
-                normal:Vector, depth:Number):void {
-     	
+        internal static function resolveParticleParticle(
+                pa:AbstractParticle, 
+                pb:AbstractParticle, 
+                normal:Vector, 
+                depth:Number):void {
+     		
+     		// a collision has occured. set the current positions to sample locations
+     		pa.curr.copy(pa.samp);
+     		pb.curr.copy(pb.samp);
+     		
             var mtd:Vector = normal.mult(depth);           
             var te:Number = pa.elasticity + pb.elasticity;
             var sumInvMass:Number = pa.invMass + pb.invMass;
             
             // the total friction in a collision is combined but clamped to [0,1]
-            var tf:Number = MathUtil.clamp(1 - (pa.friction + pb.friction), 0, 1);
+            var tf:Number = clamp(1 - (pa.friction + pb.friction), 0, 1);
             
             // get the collision components, vn and vt
             var ca:Collision = pa.getComponents(normal);
             var cb:Collision = pb.getComponents(normal);
 
-             // calculate the coefficient of restitution as the normal component
+             // calculate the coefficient of restitution based on the mass, as the normal component
             var vnA:Vector = (cb.vn.mult((te + 1) * pa.invMass).plus(
             		ca.vn.mult(pb.invMass - te * pa.invMass))).divEquals(sumInvMass);
             var vnB:Vector = (ca.vn.mult((te + 1) * pb.invMass).plus(
@@ -67,6 +73,13 @@ package org.cove.ape {
             pa.resolveCollision(mtdA, vnA, normal, depth, -1, pb);
             pb.resolveCollision(mtdB, vnB, normal, depth,  1, pa);
         }
+        
+    
+        internal static function clamp(input:Number, min:Number, max:Number):Number {
+        	if (input > max) return max;	
+            if (input < min) return min;
+            return input;
+        } 
     }
 }
 

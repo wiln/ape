@@ -23,7 +23,6 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 TODO:
 - in rotateByRadian, radius should be cached if possible 
 */
-
 package org.cove.ape {
 	
 	/**
@@ -34,6 +33,7 @@ package org.cove.ape {
 	public class Composite extends AbstractCollection {
 		
 		private var delta:Vector;
+		private var _parent:Group;
 	
 		
 		public function Composite() {
@@ -93,6 +93,14 @@ package org.cove.ape {
 		private function getRelativeAngle(center:Vector, p:Vector):Number {
 			delta.setTo(p.x - center.x, p.y - center.y);
 			return Math.atan2(delta.y, delta.x);
-		}		
+		}
+		
+		public function set parent(g:Group):void{
+			_parent = g;
+		}
+		
+		public function get parent():Group{
+			return _parent;
+		}
 	}
 }

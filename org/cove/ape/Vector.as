@@ -117,7 +117,9 @@ package org.cove.ape {
 		
 		public function distance(v:Vector):Number {
 			var delta:Vector = this.minus(v);
-			return delta.magnitude();
+			var mag:Number = delta.magnitude();
+			if (mag == 0) mag = 0.0001;
+			return mag;
 		}
 
 	
@@ -127,14 +129,7 @@ package org.cove.ape {
 			 return mult(1 / m);
 		}
 		
-		
-		public function normalizeEquals():Vector {
-			 var m:Number = magnitude();
-			 if (m == 0) m = 0.0001;
-			 return multEquals(1 / m);
-		}
-			
-					
+				
 		public function toString():String {
 			return (x + " : " + y);
 		}
