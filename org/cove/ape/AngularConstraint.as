@@ -21,8 +21,6 @@ package org.cove.ape {
 		private var _maxBreakAng:Number;
 	
 		private var _restLength:Number;
-		private var _collidable:Boolean;
-		private var _scp:SpringConstraintParticle;
 		
 		private var _broken:Boolean;
 		
@@ -34,11 +32,8 @@ package org.cove.ape {
 				maxAng:Number,
 				minBreakAng:Number = -10,
 				maxBreakAng:Number = 10,
-				stiffness:Number = .5,
-				collidable:Boolean = false,
-				rectHeight:Number = 1,
-				rectScale:Number = 1,
-				scaleToLength:Boolean = false) {
+				stiffness:Number = .5)
+				{
 			
 			super(stiffness);
 			
@@ -58,7 +53,6 @@ package org.cove.ape {
 			this.maxBreakAng = maxBreakAng;
 			
 			_restLength = currLength;
-			setCollidable(collidable, rectHeight, rectScale, scaleToLength);
 		}
 		
 		public function get p1():AbstractParticle{
@@ -87,11 +81,11 @@ package org.cove.ape {
 		
 		
 		/**
-		 * The rotational value created by the positions of the two particles attached to this
-		 * SpringConstraint. You can use this property to in your own painting methods, along with the 
+		 * The rotational value created by the positions of the first two particles attached to this
+		 * AngularConstraint. You can use this property to in your own painting methods, along with the 
 		 * <code>center</code> property. 
 		 * 
-		 * @returns A Number representing the rotation of this SpringConstraint in radians
+		 * @returns A Number representing the rotation of p1 and p2 of this AngularConstraint in radians
 		 */			
 		public function get radian():Number {
 			var d:Vector = delta;
@@ -100,11 +94,11 @@ package org.cove.ape {
 		
 		
 		/**
-		 * The rotational value created by the positions of the two particles attached to this
-		 * SpringConstraint. You can use this property to in your own painting methods, along with the 
+		 * The rotational value created by the positions of the first two particles attached to this
+		 * AngularConstraint. You can use this property to in your own painting methods, along with the 
 		 * <code>center</code> property. 
 		 * 
-		 * @returns A Number representing the rotation of this SpringConstraint in degrees
+		 * @returns A Number representing the rotation of p1 and p2 of this AngularConstraint in degrees
 		 */					
 		public function get angle():Number {
 			return radian * MathUtil.ONE_EIGHTY_OVER_PI;
@@ -112,16 +106,20 @@ package org.cove.ape {
 		
 				
 		/**
-		 * The center position created by the relative positions of the two particles attached to this
-		 * SpringConstraint. You can use this property to in your own painting methods, along with the 
+		 * The center position created by the relative positions of the first two particles attached to this
+		 * AngularConstraint. You can use this property to in your own painting methods, along with the 
 		 * rotation property.
 		 * 
-		 * @returns A Vector representing the center of this SpringConstraint
+		 * @returns A Vector representing the center of p1 and p2 of this AngularConstraint
 		 */			
 		public function get center():Vector {
 			return (p1.curr.plus(p2.curr)).divEquals(2);
 		}
 		
+		/**
+		 * The current difference between the angle of p1, p2, and p3 and a straight line (pi)
+		 * 
+		 */	
 		public function get acRadian():Number{
 			var ang12:Number = Math.atan2(p2.curr.y - p1.curr.y, p2.curr.x - p1.curr.x);
 			var ang23:Number = Math.atan2(p3.curr.y - p2.curr.y, p3.curr.x - p2.curr.x);
@@ -132,59 +130,17 @@ package org.cove.ape {
 		
 		
 		/**
-		 * If the <code>collidable</code> property is true, you can set the scale of the collidible area
-		 * between the two attached particles. Valid values are from 0 to 1. If you set the value to 1, then
-		 * the collision area will extend all the way to the two attached particles. Setting the value lower
-		 * will result in an collision area that spans a percentage of that distance. Setting the value
-		 * higher will cause the collision rectangle to extend past the two end particles.
-		 */		 	
-		public function set rectScale(s:Number):void {
-			if (scp == null) return;
-			scp.rectScale = s;
-		}
-		
-		
-		/**
-		 * @private
-		 */			
-		public function get rectScale():Number {
-			return scp.rectScale;
-		}
-		
-		
-		/**
-		 * Returns the length of the SpringConstraint, the distance between its two 
+		 * Returns the distance between its first two 
 		 * attached particles.
 		 */ 
 		public function get currLength():Number {
 			return p1.curr.distance(p2.curr);
-		}
-		
-		
-		/**
-		 * If the <code>collidable</code> property is true, you can set the height of the 
-		 * collidible rectangle between the two attached particles. Valid values are greater 
-		 * than 0. If you set the value to 10, then the collision rect will be 10 pixels high.
-		 * The height is perpendicular to the line connecting the two particles
-		 */	 
-		public function get rectHeight():Number {
-			return scp.rectHeight;
-		}
-		
-		
-		/**
-		 * @private
-		 */	
-		public function set rectHeight(h:Number):void {
-			if (scp == null) return;
-			scp.rectHeight = h;
-		}			
-		
+		}		
 			
 		/**
-		 * The <code>restLength</code> property sets the length of SpringConstraint. This value will be
+		 * The <code>restLength</code> property sets the length of AngularConstraint. This value will be
 		 * the distance between the two particles unless their position is altered by external forces. 
-		 * The SpringConstraint will always try to keep the particles this distance apart. Values must 
+		 * The AngularConstraint will always try to keep the particles this distance apart. Values must 
 		 * be > 0.
 		 */			
 		public function get restLength():Number {
@@ -199,52 +155,6 @@ package org.cove.ape {
 			if (r <= 0) throw new ArgumentError("restLength must be greater than 0");
 			_restLength = r;
 		}
-		
-			
-		/**
-		 * Determines if the area between the two particles is tested for collision. If this value is on
-		 * you can set the <code>rectHeight</code> and <code>rectScale</code> properties 
-		 * to alter the dimensions of the collidable area.
-		 */			
-		public function get collidable():Boolean {
-			return _collidable;
-		}
-		
-		
-		/**
-		 * For cases when the SpringConstraint is <code>collidable</code> and only one of the
-		 * two end particles are fixed. This value will dispose of collisions near the
-		 * fixed particle, to correct for situations where the collision could never be
-		 * resolved. Values must be between 0.0 and 1.0.
-		 */	
-		public function get fixedEndLimit():Number {
-			return scp.fixedEndLimit;
-		}	
-				
-				
-		/**
-		 * @private
-		 */	
-		public function set fixedEndLimit(f:Number):void {
-			if (scp == null) return;
-			scp.fixedEndLimit = f;
-		}
-		
-					
-		/**
-		 *
-		 */		
-		public function setCollidable(b:Boolean, rectHeight:Number, 
-				rectScale:Number, scaleToLength:Boolean=false):void {
-			
-			_collidable = b;
-			_scp = null;
-			
-			if (_collidable) {
-				//_scp = new SpringConstraintParticle(p1, p2, this, rectHeight, rectScale, scaleToLength);			
-			}
-		}
-		
 		
 		/**
 		 * Returns true if the passed particle is one of the two particles attached to this AngularConstraint.
@@ -303,16 +213,14 @@ package org.cove.ape {
 		
 		
 		/**
-		 * Sets up the visual representation of this SpringContraint. This method is called 
+		 * Sets up the visual representation of this AngularConstraint. This method is called 
 		 * automatically when an instance of this SpringContraint's parent Group is added to 
 		 * the APEngine, when  this SpringContraint's Composite is added to a Group, or this 
 		 * SpringContraint is added to a Composite or Group.
 		 */			
 		public override function init():void {	
 			cleanup();
-			if (collidable) {
-				scp.init();
-			} else if (displayObject != null) {
+			if (displayObject != null) {
 				initDisplay();
 			}
 			paint();
@@ -326,9 +234,7 @@ package org.cove.ape {
 		 */			
 		public override function paint():void {
 			
-			if (collidable) {
-				scp.paint();
-			} else if (displayObject != null) {
+			if (displayObject != null) {
 				var c:Vector = center;
 				sprite.x = c.x; 
 				sprite.y = c.y;
@@ -348,13 +254,9 @@ package org.cove.ape {
 		public function setDisplay(d:DisplayObject, offsetX:Number=0, 
 				offsetY:Number=0, rotation:Number=0):void {
 			
-			if (collidable) {
-				scp.setDisplay(d, offsetX, offsetY, rotation);
-			} else {
-				displayObject = d;
-				displayObjectRotation = rotation;
-				displayObjectOffset = new Vector(offsetX, offsetY);
-			}
+			displayObject = d;
+			displayObjectRotation = rotation;
+			displayObjectOffset = new Vector(offsetX, offsetY);
 		}
 		
 		
@@ -362,14 +264,10 @@ package org.cove.ape {
 		 * @private
 		 */
 		internal function initDisplay():void {
-			if (collidable) {
-				scp.initDisplay();
-			} else {
-				displayObject.x = displayObjectOffset.x;
-				displayObject.y = displayObjectOffset.y;
-				displayObject.rotation = displayObjectRotation;
-				sprite.addChild(displayObject);
-			}
+			displayObject.x = displayObjectOffset.x;
+			displayObject.y = displayObjectOffset.y;
+			displayObject.rotation = displayObjectRotation;
+			sprite.addChild(displayObject);
 		}
 		
 							
@@ -378,14 +276,6 @@ package org.cove.ape {
 		 */		
 		internal function get delta():Vector {
 			return p1.curr.minus(p2.curr);
-		}		
-
-
-		/**
-		 * @private
-		 */		
-		internal function get scp():SpringConstraintParticle {
-			return _scp;
 		}
 		
 		/**
