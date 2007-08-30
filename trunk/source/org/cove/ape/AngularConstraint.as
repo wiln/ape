@@ -154,7 +154,7 @@ package org.cove.ape {
 		 * The current difference between the angle of p1, p2, and p3 and a straight line (pi)
 		 * 
 		 */	
-		public function get acRadian():Number{
+		public function get acRadian():Number {
 			var ang12:Number = Math.atan2(p2.curr.y - p1.curr.y, p2.curr.x - p1.curr.x);
 			var ang23:Number = Math.atan2(p3.curr.y - p2.curr.y, p3.curr.x - p2.curr.x);
 			
@@ -207,37 +207,37 @@ package org.cove.ape {
 		}
 		
 		
-		public function get minAng():Number{
+		public function get minAng():Number {
 			return _minAng;
 		}
 		
 		
-		public function set minAng(n:Number):void{
+		public function set minAng(n:Number):void {
 			_minAng = n;
 		}
 		
 		
-		public function get maxAng():Number{
+		public function get maxAng():Number {
 			return _maxAng;
 		}
 		
 		
-		public function set maxAng(n:Number):void{
+		public function set maxAng(n:Number):void {
 			_maxAng = n;
 		}
 		
 		
-		public function get minBreakAng():Number{
+		public function get minBreakAng():Number {
 			return _minBreakAng;
 		}
 		
 		
-		public function set minBreakAng(n:Number):void{
+		public function set minBreakAng(n:Number):void {
 			_minBreakAng = n;
 		}
 		
 		
-		public function get maxBreakAng():Number{
+		public function get maxBreakAng():Number {
 			return _maxBreakAng;
 		}
 		
@@ -247,7 +247,7 @@ package org.cove.ape {
 		}
 		
 		
-		public function get broken():Boolean{
+		public function get broken():Boolean {
 			return _broken;
 		}
 		
@@ -259,9 +259,9 @@ package org.cove.ape {
 		
 		/**
 		 * Sets up the visual representation of this AngularConstraint. This method is called 
-		 * automatically when an instance of this SpringContraint's parent Group is added to 
-		 * the APEngine, when  this SpringContraint's Composite is added to a Group, or this 
-		 * SpringContraint is added to a Composite or Group.
+		 * automatically when an instance of this AngularConstraint's parent Group is added to 
+		 * the APEngine, when  this AngularConstraint's Composite is added to a Group, or this 
+		 * AngularConstraint is added to a Composite or Group.
 		 */			
 		public override function init():void {	
 			cleanup();
