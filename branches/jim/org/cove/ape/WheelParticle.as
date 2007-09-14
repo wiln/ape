@@ -230,7 +230,7 @@ package org.cove.ape {
 		 * Origins of this code thanks to Raigan Burns, Metanet software
 		 */
 		private function resolve(n:Vector):void {
-	
+			
 			// this is the tangent vector at the rim particle
 			tan.setTo(-rp.curr.y, rp.curr.x);
 	
@@ -254,7 +254,7 @@ package org.cove.ape {
 			var slipSpeed:Number = (1 - _traction) * rp.speed;
 			normSlip.setTo(slipSpeed * n.y, slipSpeed * n.x);
 			curr.plusEquals(normSlip);
-			rp.speed *= _traction;	
+			rp.speed *= _traction;
 		}
 	}
 }
