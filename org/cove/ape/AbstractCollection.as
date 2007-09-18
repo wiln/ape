@@ -163,13 +163,8 @@ package org.cove.ape {
 			}
 			
 			for (i = 0; i < _constraints.length; i++) {
-				if(_constraints[i] is AngularConstraint){
-					var ac:AngularConstraint = _constraints[i];
-					if ((! ac.fixed) || ac.alwaysRepaint) ac.paint();
-				}else{
-					var sc:SpringConstraint = _constraints[i];
-					if ((! sc.fixed) || sc.alwaysRepaint) sc.paint();
-				}
+				var sc:SpringConstraint = _constraints[i];
+				if ((! sc.fixed) || sc.alwaysRepaint) sc.paint();
 			}
 		}
 		
@@ -277,12 +272,10 @@ package org.cove.ape {
 				// ...vs every other constraint in this AbstractCollection
 				//var clen:int = _constraints.length;
 				for (var n:int = 0; n < _constraints.length; n++) {
-					if(_constraints[n] is SpringConstraint){
-						var c:SpringConstraint = _constraints[n];
-						if (c.collidable && ! c.isConnectedTo(pa)) {
-							c.scp.updatePosition();
-							CollisionDetector.test(pa, c.scp);
-						}
+					var c:SpringConstraint = _constraints[n];
+					if (c.collidable && ! c.isConnectedTo(pa)) {
+						c.scp.updatePosition();
+						CollisionDetector.test(pa, c.scp);
 					}
 				}
 			}
@@ -310,12 +303,10 @@ package org.cove.ape {
 				// ...vs every constraint in the other collection
 				//var acclen:int = ac.constraints.length;
 				for (x = 0; x < ac.constraints.length; x++) {
-					if(ac.constraints[x] is SpringConstraint){
-						var cgb:SpringConstraint = ac.constraints[x];
-						if (cgb.collidable && ! cgb.isConnectedTo(pga)) {
-							cgb.scp.updatePosition();
-							CollisionDetector.test(pga, cgb.scp);
-						}
+					var cgb:SpringConstraint = ac.constraints[x];
+					if (cgb.collidable && ! cgb.isConnectedTo(pga)) {
+						cgb.scp.updatePosition();
+						CollisionDetector.test(pga, cgb.scp);
 					}
 				}
 			}
@@ -323,7 +314,6 @@ package org.cove.ape {
 			// every constraint in this collection...
 			//var clen:int = _constraints.length;
 			for (j = 0; j < _constraints.length; j++) {
-				if(!(_constraints[j] is SpringConstraint)) continue;
 				var cga:SpringConstraint = _constraints[j];
 				if (cga == null || ! cga.collidable) continue;
 				
