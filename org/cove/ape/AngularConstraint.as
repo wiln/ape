@@ -18,6 +18,8 @@ package org.cove.ape {
 		private var _minBreakAng:Number;
 		private var _maxBreakAng:Number;
 		
+		private var _dependent:Boolean = false;
+		
 		public function AngularConstraint(
 				p1:AbstractParticle, 
 				p2:AbstractParticle,
@@ -114,6 +116,14 @@ package org.cove.ape {
 			_maxBreakAng = n;
 		}
 		
+		public function get dependent():Boolean{
+			return _dependent;
+		}
+		
+		public function set dependent(b:Boolean):void{
+			_dependent = b;
+		}
+		
 		/**
 		 * @private
 		 */
@@ -129,9 +139,11 @@ package org.cove.ape {
 			while (angDiff > Math.PI) angDiff -= PI2;
 			while (angDiff < -Math.PI) angDiff += PI2;
 			
-			var sumInvMass:Number = p1.invMass + p2.invMass;
+			var p2invMass:Number = (_dependent == true) ? 0 : p2.invMass;
+			
+			var sumInvMass:Number = p1.invMass + p2invMass;
 			var mult1:Number = p1.invMass/sumInvMass;
-			var mult2:Number = p2.invMass/sumInvMass;
+			var mult2:Number = p2invMass/sumInvMass;
 			var angChange:Number = 0;
 			
 			var lowMid:Number = (maxAng - minAng) / 2;

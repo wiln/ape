@@ -21,15 +21,15 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package org.cove.ape {
 	
-	internal final class MathUtil {
+	public final class MathUtil {
 
-		internal static var ONE_EIGHTY_OVER_PI:Number = 180 / Math.PI;
-		internal static var PI_OVER_ONE_EIGHTY:Number = Math.PI / 180;
+		public static var ONE_EIGHTY_OVER_PI:Number = 180 / Math.PI;
+		public static var PI_OVER_ONE_EIGHTY:Number = Math.PI / 180;
 
 		/**
 		 * Returns n clamped between min and max
 		 */	
-		internal static function clamp(n:Number, min:Number, max:Number):Number {
+		public static function clamp(n:Number, min:Number, max:Number):Number {
 			if (n < min) return min;
 			if (n > max) return max;
 			return n;
@@ -39,7 +39,7 @@ package org.cove.ape {
 		/**
 		 * Returns 1 if the value is >= 0. Returns -1 if the value is < 0.
 		 */	
-		internal static function sign(val:Number):int {
+		public static function sign(val:Number):int {
 			if (val < 0) return -1
 			return 1;
 		}
