@@ -1,0 +1,19 @@
+implement
+---------------
+angular constraints
+swept tests and get rid of multisampling
+forces (& more forces)
+displayObject, center property, bounding box/circle, for Composite
+arcSegmentParticle
+tearable spring constraints
+more demos
+
+
+consider
+---------------
+APEngine non-static (suggested by Troy Gilbert)
+
+
+Documentation
+---------------
+a lot more
