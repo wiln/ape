@@ -80,11 +80,10 @@ package org.cove.ape {
 			var j;
 			for(i=0;i<4;i++){
 				var hit=true;
-				//var dotoncircle=new Vector(0,0);
-				//this is the farest dot of the circle on normals[i] direction
+				//this is the farest point of the circle on normals[i] direction
 				var dotoncircle=p.curr.minus(normals[i].mult(p.radius)).minus(curr);
+				//check if dotoncircle is inside the particle
 				for(j=0;j<4;j++){
-					//check if dotoncircle is on the other side of the border
 					var test=dotoncircle.minus(sides[j]).dot(normals[j]);
 					//trace(normals[j]+" "+sides[j]);
 					//trace(p.curr.minus(curr)+" "+dotoncircle+" "+test);
@@ -134,12 +133,6 @@ package org.cove.ape {
 				psides[i].plusEquals(diff);
 				pvertices[i].plusEquals(diff);
 			}
-			/*trace(normals)
-			trace(sides)
-			trace(vertices)
-			trace(pnormals)
-			trace(psides)
-			trace(pvertices)*/
 			var hitpoints:Array=new Array();
 			var hit;
 			for(i=0;i<4;i++){
@@ -186,11 +179,6 @@ package org.cove.ape {
 		internal override function resolveCollision(
 				mtd:Vector, vel:Vector, n:Vector, d:Number, o:int, p:AbstractParticle):void {
 			var arm=findHitPoint(p)
-			if(arm==undefined){
-				super.resolveCollision(mtd,vel,n,d,o,p);
-				return;
-			}
-			//.minusEquals(curr);
 			var aa=arm.cross(mtd);
 			_av+=aa;
 			super.resolveCollision(mtd,vel,n,d,o,p);
