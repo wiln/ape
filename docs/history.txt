@@ -1,3 +1,8 @@
+09-24-07 Branched from Trunk at 0.5a
+
+
+
+
 TBD Version 0.5a;
 AbstractConstraint.resolve() is now public so it can be overridden (thanks to Interfaced)
 CollisionEvent class with COLLISION and FIRST_COLLISION events.
