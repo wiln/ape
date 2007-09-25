@@ -126,6 +126,8 @@ package org.cove.ape {
 		 * this one.
 		 */
 		public function addCollidable(g:Group):void {
+			var pos:int = collisionList.indexOf(g);
+			if (pos != -1) return;
 			 collisionList.push(g);
 		}
 

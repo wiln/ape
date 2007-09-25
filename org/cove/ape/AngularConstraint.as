@@ -18,8 +18,6 @@ package org.cove.ape {
 		private var _minBreakAng:Number;
 		private var _maxBreakAng:Number;
 		
-		private var _dependent:Boolean = false;
-		
 		public function AngularConstraint(
 				p1:AbstractParticle, 
 				p2:AbstractParticle,
@@ -28,14 +26,15 @@ package org.cove.ape {
 				maxAng:Number,
 				minBreakAng:Number = -10,
 				maxBreakAng:Number = 10,
-				stiffness:Number = .5, 
-				collidable = false,
+				stiffness:Number = .5,
+				dependent:Boolean = false,
+				collidable:Boolean = false,
 				rectHeight:Number = 1,
 				rectScale:Number = 1,
 				scaleToLength:Boolean = false)
 				{
 			
-			super(p1, p2, stiffness, false, collidable, rectHeight, rectScale, scaleToLength);
+			super(p1, p2, stiffness, false, dependent, collidable, rectHeight, rectScale, scaleToLength);
 			
 			this.p3 = p3;
 			
@@ -116,14 +115,6 @@ package org.cove.ape {
 			_maxBreakAng = n;
 		}
 		
-		public function get dependent():Boolean{
-			return _dependent;
-		}
-		
-		public function set dependent(b:Boolean):void{
-			_dependent = b;
-		}
-		
 		/**
 		 * @private
 		 */
@@ -139,7 +130,7 @@ package org.cove.ape {
 			while (angDiff > Math.PI) angDiff -= PI2;
 			while (angDiff < -Math.PI) angDiff += PI2;
 			
-			var p2invMass:Number = (_dependent == true) ? 0 : p2.invMass;
+			var p2invMass:Number = (dependent == true) ? 0 : p2.invMass;
 			
 			var sumInvMass:Number = p1.invMass + p2invMass;
 			var mult1:Number = p1.invMass/sumInvMass;
