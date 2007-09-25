@@ -53,6 +53,8 @@ package org.cove.ape {
 		private var _breakRatio:Number;
 		private var _breakLength:Number;
 		
+		private var _dependent:Boolean;
+		
 		/**
 		 * @param p1 The first particle this constraint is connected to.
 		 * @param p2 The second particle this constraint is connected to.
@@ -72,6 +74,7 @@ package org.cove.ape {
 				p2:AbstractParticle, 
 				stiffness:Number = 0.5,
 				breakable:Boolean = false,
+				dependent:Boolean = false,
 				collidable:Boolean = false,
 				rectHeight:Number = 1,
 				rectScale:Number = 1,
@@ -85,6 +88,7 @@ package org.cove.ape {
 			
 			_restLength = currLength;
 			_breakable = breakable;
+			_dependent = dependent;
 			setCollidable(collidable, rectHeight, rectScale, scaleToLength);
 		}
 		
@@ -229,7 +233,15 @@ package org.cove.ape {
 		
 		public function set broken(b:Boolean):void{
 			_broken = b;
-		}		
+		}
+		
+		public function get dependent():Boolean{
+			return _dependent;
+		}
+		
+		public function set dependent(b:Boolean):void{
+			_dependent = b;
+		}
 		
 		/**
 		 * For cases when the SpringConstraint is <code>collidable</code> and only one of the
@@ -398,10 +410,11 @@ package org.cove.ape {
 					}
 				}
 			}
-			var diff:Number = (deltaLength - restLength) / (deltaLength * (p1.invMass + p2.invMass));
+			var p1invMass:Number = (_dependent == true) ? 0 : p1.invMass;
+			var diff:Number = (deltaLength - restLength) / (deltaLength * (p1invMass + p2.invMass));
 			var dmds:Vector = delta.mult(diff * stiffness);
 		
-			p1.curr.minusEquals(dmds.mult(p1.invMass));
+			p1.curr.minusEquals(dmds.mult(p1invMass));
 			p2.curr.plusEquals (dmds.mult(p2.invMass));
 		}
 		
