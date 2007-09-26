@@ -209,7 +209,7 @@ package org.cove.ape {
 		/**
 		 * 
 		 */					
-		private function setAxes(t:Number):void {
+		internal function setAxes(t:Number):void {
 			var s:Number = Math.sin(t);
 			var c:Number = Math.cos(t);
 			
