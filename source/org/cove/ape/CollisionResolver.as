@@ -53,6 +53,8 @@ package org.cove.ape {
             		cb.vn.mult(pa.invMass - te * pb.invMass))).divEquals(sumInvMass);
             
             // apply friction to the tangental component
+			//trace(ca.vt);
+			//trace(tf);
             ca.vt.multEquals(tf);
             cb.vt.multEquals(tf);
             
@@ -63,9 +65,14 @@ package org.cove.ape {
             // add the tangental component to the normal component for the new velocity 
             vnA.plusEquals(ca.vt);
             vnB.plusEquals(cb.vt);
-           
-            pa.resolveCollision(mtdA, vnA, normal, depth, -1, pb);
-            pb.resolveCollision(mtdB, vnB, normal, depth,  1, pa);
+			//trace("mtda="+mtdA);
+            if(pa is IRigidItem && pb is IRigidItem){
+				RigidCollisionResolver.resolve(pa,pb,
+					normal,depth,mtd,tf,mtdA,mtdB,vnA,vnB,ca,cb);
+			}else{
+				pa.resolveCollision(mtdA, vnA, normal, depth, -1, pb);
+				pb.resolveCollision(mtdB, vnB, normal, depth,  1, pa);
+			}
         }
     }
 }
