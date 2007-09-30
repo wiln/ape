@@ -22,7 +22,107 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package org.cove.ape {
 	
-	public class RigidRectangle extends RectangleParticle implements IRigidItem{
+	public class RigidRectangle extends RigidItem{
+		private var _extents:Array;
+		private var _axes:Array;
+		private var _vertices:Array;
+		private var _marginCenters:Array;
+		private var _normals:Array;
+
+		function RigidRectangle(
+				x:Number, 
+				y:Number, 
+				width:Number,
+				height:Number,
+				radian:Number=0,
+				isFixed:Boolean=false, 
+				mass:Number=1, 
+				elasticity:Number=0.3,
+				friction:Number=0,
+				angularVelocity:Number=0) {
+			super(x,y,Math.sqrt(width*width/4+height*height/4),isFixed,mass,elasticity,friction,radian,angularVelocity);
+			_extents = new Array(width/2, height/2);
+			_axes = new Array(new Vector(0,0), new Vector(0,0));
+			_normals=new Array();
+			_marginCenters=new Array();
+			_vertices=new Array();
+			for(var i=0;i<4;i++){
+				_normals.push(new Vector(0,0));
+				_marginCenters.push(new Vector(0,0));
+				_vertices.push(new Vector(0,0));
+			}
+		}
+		public override function drawShape(graphics){
+			var w:Number = extents[0] * 2;
+			var h:Number = extents[1] * 2;
+			
+			sprite.graphics.clear();
+			sprite.graphics.lineStyle(lineThickness, lineColor, lineAlpha);
+			sprite.graphics.beginFill(fillColor, fillAlpha);
+			sprite.graphics.drawRect(-w/2, -h/2, w, h);
+			sprite.graphics.endFill();
+		}
+		public override function setAxes(n:Number):void{
+			var s:Number = Math.sin(n);
+			var c:Number = Math.cos(n);
+			axes[0].x = c;
+			axes[0].y = s;
+			axes[1].x = -s;
+			axes[1].y = c;
+			//
+			_normals[0].copy(axes[0]);
+			_normals[1].copy(axes[1]);
+			_normals[2]=axes[0].mult(-1);
+			_normals[3]=axes[1].mult(-1);
+			//.plusEquals(curr)
+			_marginCenters[0]=axes[0].mult( extents[0]);
+			_marginCenters[1]=axes[1].mult( extents[1]);
+			_marginCenters[2]=axes[0].mult(-extents[0]);
+			_marginCenters[3]=axes[1].mult(-extents[1]);
+			//.minusEquals(curr)
+			_vertices[0]=_marginCenters[0].plus(_marginCenters[1]);
+			_vertices[1]=_marginCenters[1].plus(_marginCenters[2]);
+			_vertices[2]=_marginCenters[2].plus(_marginCenters[3]);
+			_vertices[3]=_marginCenters[3].plus(_marginCenters[0]);
+		}
+		public override function isInside(vertex:Vector):Boolean{
+			for(var i=0;i<_marginCenters.length;i++){
+				var x=vertex.minus(_marginCenters[i]).dot(_normals[i])
+				if(x>0.01){
+					return false;
+				}
+			}
+			return true;
+		}
+		public function get axes():Array {
+			return _axes;
+		}
+		public function get extents():Array {
+			return _extents;
+		}
+		public function getVertices(axis:Array):Array{
+			return _vertices;
+		}
+		public function getNormals():Array{
+			return _normals;
+		}
+		public function getMarginCenters():Array{
+			return _marginCenters;
+		}
+		internal function getProjection(axis:Vector):Interval {
+			
+			var radius:Number =
+			    extents[0] * Math.abs(axis.dot(axes[0]))+
+			    extents[1] * Math.abs(axis.dot(axes[1]));
+			
+			var c:Number = samp.dot(axis);
+			
+			interval.min = c - radius;
+			interval.max = c + radius;
+			return interval;
+		}
+	}
+	/*public class RigidRectangle extends RectangleParticle implements IRigidItem{
 		private var _av:Number;
 		private var _vertices:Array;
 		private var _marginCenters:Array;
@@ -64,10 +164,10 @@ package org.cove.ape {
 		public function getVertices(axis:Array):Array{
 			return _vertices;
 		}
-		internal function getNormals():Array{
+		public function getNormals():Array{
 			return _normals;
 		}
-		internal function getMarginCenters():Array{
+		public function getMarginCenters():Array{
 			return _marginCenters;
 		}
 		public function set k(n:Number){
@@ -77,13 +177,13 @@ package org.cove.ape {
 			return _rigidFriction;
 		}
 		public override function update(dt2:Number):void {
-			angle+=_av*dt2;
+			radian+=_av*dt2;
 			super.update(dt2);
 		}
-		internal function resolveRigidCollision(
+		public function resolveRigidCollision(
 				aa:Number, mtd:Vector, vel:Vector, n:Vector, 
 				d:Number, o:int, p:AbstractParticle):void {
-			_av+=aa;
+			_av+=aa * MathUtil.PI_OVER_ONE_EIGHTY;
 			resolveCollision(mtd,vel,n,d,o,p);
 		}
 		//private function setAxes(t:Number):void
@@ -104,5 +204,5 @@ package org.cove.ape {
 			_vertices[2]=_marginCenters[2].plus(_marginCenters[3]);
 			_vertices[3]=_marginCenters[3].plus(_marginCenters[0]);
 		}
-	}
+	}*/
 }
