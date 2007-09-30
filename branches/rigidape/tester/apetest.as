@@ -27,8 +27,8 @@ package{
 			surfaces.addParticle(new RigidRectangle(220, 100, 280, 5, 0.3, true));
 			surfaces.addParticle(new RigidRectangle(420, 200, 280, 5, -0.3, true));
 			surfaces.addParticle(new RigidRectangle(220, 300, 280, 5, 0.3, true));
-			surfaces.addParticle(new CircleParticle(500,120,10,true));
-			surfaces.addParticle(new CircleParticle(460,130,10,true));
+			surfaces.addParticle(new RigidCircle(500,120,10,true));
+			surfaces.addParticle(new RigidCircle(460,130,10,true));
 			APEngine.addGroup(surfaces);
 			balls = new Group();
 			APEngine.addGroup(balls);
@@ -38,10 +38,10 @@ package{
 			balls.addParticle(new RigidRectangle(randomX+50, 30, 40,20,0,false,1,0.1,0.1));
 			balls.addParticle(new RigidRectangle(randomX-50, 30, 40,20,0,false,1,0.1,0.1));
 			balls.addParticle(new RigidRectangle(randomX+100, 30, 40,20,0,false,1,0.1,0.1));
-			balls.addParticle(new RigidRectangle(500, 420, 40,20,0,false,1,0.1,0.1));
+			/*balls.addParticle(new RigidRectangle(500, 420, 40,20,0,false,1,0.1,0.1));
 			balls.addParticle(new RigidRectangle(500, 400, 40,20,0,false,1,0.1,0.1));
 			balls.addParticle(new RigidRectangle(500, 380, 40,20,0,false,1,0.1,0.1));
-			balls.addParticle(new RigidRectangle(500, 360, 40,20,0,false,1,0.1,0.1));
+			balls.addParticle(new RigidRectangle(500, 360, 40,20,0,false,1,0.1,0.1));*/
 			balls.addCollidableList(new Array(surfaces));
 			balls.collideInternal=true;
 			addEventListener(Event.ENTER_FRAME, enterFrameHandler);
@@ -56,11 +56,11 @@ package{
 		private function keyDownHandler(keyboardEvent:KeyboardEvent):void {
 			if (keyboardEvent.keyCode == 38) {
 				//p1.addMasslessForce(new Vector(0, -1));
-				if(Math.random()<0.5){
+				if(Math.random()<0.01){
 					balls.addParticle(new RigidRectangle(Math.random()*450+100, 20, Math.random()*20+20,Math.random()*20+20,Math.random()*1.6,false,1,0.1,0.1));
 					//,false,1,0.1,0.1
 				}else{
-					balls.addParticle(new CircleParticle(Math.random()*450+100, 20, Math.random()*10+10));
+					balls.addParticle(new RigidCircle(Math.random()*450+100, 20, Math.random()*10+10));
 				}
 			} /*else if (keyboardEvent.keyCode == 40) {
 				p1.addMasslessForce(new Vector(0, 1));

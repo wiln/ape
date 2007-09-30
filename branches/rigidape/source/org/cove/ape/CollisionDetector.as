@@ -1,4 +1,4 @@
-/*
+﻿/*
 Copyright (c) 2006, 2007 Alec Cove
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this 
@@ -137,7 +137,12 @@ package org.cove.ape {
 		 */	
 		private static function testTypes(
 				objA:AbstractParticle, objB:AbstractParticle):Boolean {	
-			
+			//Following code was added for rigidAPE
+			if (objA is RigidItem && objB is RigidItem) {
+				RigidCollisionDector.test(objA as RigidItem,objB as RigidItem);
+				return false;
+			}
+			//end of RigidAPE code
 			if (objA is RectangleParticle && objB is RectangleParticle) {
 				return testOBBvsOBB(objA as RectangleParticle, objB as RectangleParticle);
 			
