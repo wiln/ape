@@ -1,7 +1,6 @@
 package org.cove.ape {
 	
 	public interface IRigidItem{
-		function isInside(vertex:Vector):Boolean;
 		function resolveRigidCollision(
 				aa:Number, mtd:Vector, vel:Vector, n:Vector, 
 				d:Number, o:int, p:AbstractParticle):void;

@@ -1,9 +1,11 @@
 ﻿package org.cove.ape {
 	
-	public class RigidItem extends AbstractParticle implements IRigidItem{
+	public class RigidItem extends AbstractParticle{
 		private var _angularVelocity:Number;
 		private var _frictionalCoefficient:Number;
 		private var _radian:Number;
+		private var _prevRadian:Number;
+		private var torque:Number;
 		private var _range:Number;
 		
 		function RigidItem(
@@ -13,7 +15,7 @@
 				isFixed:Boolean, 
 				mass:Number=1, 
 				elasticity:Number=0.3,
-				friction:Number=0,
+				friction:Number=0.2,
 				radian:Number=0,
 				angularVelocity:Number=0) {
 			_range=range;
@@ -67,20 +69,29 @@
 			return _range;
 		}
 		public override function update(dt2:Number):void {
+			_angularVelocity*=0.99;
 			radian+=_angularVelocity*dt2;
 			super.update(dt2);
 		}
-		public function resolveRigidCollision(aa:Number,
-				mtd:Vector, vel:Vector, n:Vector, d:Number,
-				o:int, p:AbstractParticle):void{
-			_angularVelocity+=aa;
-			resolveCollision(mtd,vel,n,d,o,p);
+		public function resolveRigidCollision(aa:Number,fr:Vector,p):void{
+			if (fixed || (! solid) || (! p.solid)) return;
+			_angularVelocity+=aa/10;
+			//curr.plusEquals(fr);
 		}
-		public function isInside(vertex:Vector):Boolean{
-			return false;
+		public function captures(vertex:Vector):Boolean{
+			var d=vertex.distance(samp)-range;
+			//trace(d);
+			if(d<=0){
+				return true;
+			}else{
+				return false;
+			}
 		}
-		public function checkRange(r:RigidItem):Boolean{
-			return r.samp.minus(samp).magnitude()<=(range+r.range);
+		public function getVelocityOn(vertex:Vector){
+			//trace(vertex);
+			var arm=vertex.minus(samp);
+			var v=arm.normalize();
+			return new Vector(-v.y,v.x).multEquals(_angularVelocity*arm.magnitude()).plusEquals(velocity);
 		}
 	}
 }
