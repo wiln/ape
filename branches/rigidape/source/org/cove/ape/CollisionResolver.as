@@ -1,4 +1,4 @@
-/*
+﻿/*
 Copyright (c) 2006, 2007 Alec Cove
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this 
@@ -34,7 +34,7 @@ package org.cove.ape {
         
         internal static function resolve (pa:AbstractParticle, pb:AbstractParticle, 
                 normal:Vector, depth:Number):void {
-     	
+			//trace(normal+" "+depth);
             var mtd:Vector = normal.mult(depth);           
             var te:Number = pa.elasticity + pb.elasticity;
             var sumInvMass:Number = pa.invMass + pb.invMass;
@@ -66,13 +66,8 @@ package org.cove.ape {
             vnA.plusEquals(ca.vt);
             vnB.plusEquals(cb.vt);
 			//trace("mtda="+mtdA);
-            if(pa is IRigidItem && pb is IRigidItem){
-				RigidCollisionResolver.resolve(pa,pb,
-					normal,depth,mtd,tf,mtdA,mtdB,vnA,vnB,ca,cb);
-			}else{
 				pa.resolveCollision(mtdA, vnA, normal, depth, -1, pb);
 				pb.resolveCollision(mtdB, vnB, normal, depth,  1, pa);
-			}
         }
     }
 }

@@ -1,4 +1,4 @@
-package{
+﻿package{
 	import org.cove.ape.*;
 	import flash.display.MovieClip;
 	import flash.display.Sprite;
@@ -18,26 +18,29 @@ package{
 			APEngine.addForce(new VectorForce(false,0, 0.5));//Massless
 			var wall:RigidRectangle = new RigidRectangle(640, 240, 100, 480, 0, true);
 			var wall2:RigidRectangle = new RigidRectangle(0, 240, 100, 480, 0, true);
-			var ground:RigidRectangle = new RigidRectangle(320, 480, 640, 100, 0, true);
+			var ground = new RigidRectangle(320, 480, 640, 100, 0, true);
 			
 			var surfaces:Group = new Group();
 			surfaces.addParticle(wall);
 			surfaces.addParticle(wall2);
 			surfaces.addParticle(ground);
-			surfaces.addParticle(new RigidRectangle(220, 100, 280, 5, 0.3, true));
-			surfaces.addParticle(new RigidRectangle(420, 200, 280, 5, -0.3, true));
+			surfaces.addParticle(new RigidRectangle(290, 300, 140,5,0.2,true,1,0.3,1));
+			//, 40, 0.3, true));
+			/*surfaces.addParticle(new RigidRectangle(420, 200, 280, 5, -0.3, true));
 			surfaces.addParticle(new RigidRectangle(220, 300, 280, 5, 0.3, true));
 			surfaces.addParticle(new RigidCircle(500,120,10,true));
-			surfaces.addParticle(new RigidCircle(460,130,10,true));
+			surfaces.addParticle(new RigidCircle(460,130,10,true));*/
 			APEngine.addGroup(surfaces);
 			balls = new Group();
 			APEngine.addGroup(balls);
-			var randomX:Number = 290;
+			var randomX:Number = 330;
 			//Math.random()*300+100;
-			balls.addParticle(new RigidRectangle(randomX, 30, 40,20,0,false,1,0.1,0.1));
-			balls.addParticle(new RigidRectangle(randomX+50, 30, 40,20,0,false,1,0.1,0.1));
-			balls.addParticle(new RigidRectangle(randomX-50, 30, 40,20,0,false,1,0.1,0.1));
-			balls.addParticle(new RigidRectangle(randomX+100, 30, 40,20,0,false,1,0.1,0.1));
+			//balls.addParticle(new RigidCircle(randomX, 30, 40,false,1,0.3,1));
+			balls.addParticle(new RigidRectangle(randomX, 30, 40, 20,0.1,false,1,0.1,0.1));
+			//balls.addParticle(new RigidRectangle(randomX, 130, 40,20,0.1,false,1,0.1,0.1));
+			//balls.addParticle(new RigidRectangle(randomX+50, 30, 40,20,0,false,1,0.1,0.1));
+			//balls.addParticle(new RigidRectangle(randomX-50, 30, 40,20,0,false,1,0.1,0.1));
+			//balls.addParticle(new RigidRectangle(randomX+100, 30, 40,20,0,false,1,0.1,0.1));
 			/*balls.addParticle(new RigidRectangle(500, 420, 40,20,0,false,1,0.1,0.1));
 			balls.addParticle(new RigidRectangle(500, 400, 40,20,0,false,1,0.1,0.1));
 			balls.addParticle(new RigidRectangle(500, 380, 40,20,0,false,1,0.1,0.1));
@@ -56,7 +59,7 @@ package{
 		private function keyDownHandler(keyboardEvent:KeyboardEvent):void {
 			if (keyboardEvent.keyCode == 38) {
 				//p1.addMasslessForce(new Vector(0, -1));
-				if(Math.random()<0.01){
+				if(Math.random()<0.5){
 					balls.addParticle(new RigidRectangle(Math.random()*450+100, 20, Math.random()*20+20,Math.random()*20+20,Math.random()*1.6,false,1,0.1,0.1));
 					//,false,1,0.1,0.1
 				}else{

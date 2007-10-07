@@ -31,7 +31,7 @@ package org.cove.ape {
 				isFixed:Boolean=false, 
 				mass:Number=1, 
 				elasticity:Number=0.3,
-				friction:Number=0,
+				friction:Number=0.2,
 				radian:Number=0,
 				angularVelocity:Number=0) {
 			_radius=radius;
@@ -51,13 +51,10 @@ package org.cove.ape {
 			graphics.lineTo(0,-radius);
 			graphics.endFill();
 		}
-		public override function isInside(vertex:Vector):Boolean{
-			return vertex.magnitude()<=radius;
-		}
 		public function getVertices(axis:Array):Array{
 			var vertices=new Array();
 			for(var i=0;i<axis.length;i++){
-				vertices.push(axis[i].mult(radius));
+				vertices.push(axis[i].mult(radius).plusEquals(samp));
 			}
 			return vertices;
 		}
@@ -68,91 +65,24 @@ package org.cove.ape {
 			
 			return interval;
 		}
-	}
-	/*public class RigidCircle extends CircleParticle implements IRigidItem{
-		private var _av:Number;
-		private var _vertices:Array;
-		private var _rigidFriction:Number;
-		private var _normals:Array;
-		private var _radian:Number;
-
-		public function RigidCircle (
-				x:Number, 
-				y:Number, 
-				radius:Number, 
-				fixed:Boolean = false,
-				mass:Number = 1, 
-				elasticity:Number = 0.3,
-				friction:Number = 0) {
-			super(x, y, radius, fixed, mass, elasticity, 0);
-			_av=0;
-			radian = 0;
-			_rigidFriction=friction;
-			_normals=new Array();
-		}
-		public override function init():void {
-			cleanup();
-			if (displayObject != null) {
-				initDisplay();
-			} else {
-				sprite.graphics.clear();
-				sprite.graphics.lineStyle(lineThickness, lineColor, lineAlpha);
-				sprite.graphics.beginFill(fillColor, fillAlpha);
-				sprite.graphics.drawCircle(0, 0, radius);
-				sprite.graphics.moveTo(radius,0);
-				sprite.graphics.lineTo(-radius,0);
-				sprite.graphics.moveTo(0,radius);
-				sprite.graphics.lineTo(0,-radius);
-				sprite.graphics.endFill();
-			}
-			paint();
-		}
-		public override function paint():void {
-			sprite.x = curr.x;
-			sprite.y = curr.y;
-			sprite.rotation = angle;
-		}
-		public function get radian():Number {
-			return _radian;
-		}
-		public function set radian(t:Number):void {
-			_radian = t;
-		}
-		public function get angle():Number {
-			return radian * MathUtil.ONE_EIGHTY_OVER_PI;
-		}
-		public function set angle(a:Number):void {
-			radian = a * MathUtil.PI_OVER_ONE_EIGHTY;
-		}
-		public override function update(dt2:Number):void {
-			radian+=_av*dt2;
-			super.update(dt2);
-		}
-		public function isInside(vertex:Vector):Boolean{
-			//trace("c is inside "+vertex+" "+vertex.magnitude()+" "+radius);
-			return vertex.magnitude()<=radius;
-		}
-		public function getVertices(axis:Array):Array{
-			var vertices=new Array();
-			for(var i=0;i<axis.length;i++){
-				vertices.push(axis[i].mult(radius));
-			}
-			return vertices;
-		}
-		public function getNormals():Array{
-			return _normals;
-		}
-		public function resolveRigidCollision(
-				aa:Number, mtd:Vector, vel:Vector, n:Vector, 
-				d:Number, o:int, p:AbstractParticle):void {
-			_av+=aa * MathUtil.PI_OVER_ONE_EIGHTY;
-			resolveCollision(mtd,vel,n,d,o,p);
-		}
-		public function set k(n:Number){
-			_rigidFriction=n;
-		}
-		public function get k():Number{
-			return _rigidFriction;
 		
-	}}*/
+		/**
+		 * @private
+		 */
+		internal function getIntervalX():Interval {
+			interval.min = samp.x - _radius;
+			interval.max = samp.x + _radius;
+			return interval;
+		}
+		
+		
+		/**
+		 * @private
+		 */		
+		internal function getIntervalY():Interval {
+			interval.min = samp.y - _radius;
+			interval.max = samp.y + _radius;
+			return interval;
+		}
+	}
 }

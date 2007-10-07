@@ -38,7 +38,7 @@ package org.cove.ape {
 				isFixed:Boolean=false, 
 				mass:Number=1, 
 				elasticity:Number=0.3,
-				friction:Number=0,
+				friction:Number=0.2,
 				angularVelocity:Number=0) {
 			super(x,y,Math.sqrt(width*width/4+height*height/4),isFixed,mass,elasticity,friction,radian,angularVelocity);
 			_extents = new Array(width/2, height/2);
@@ -85,9 +85,9 @@ package org.cove.ape {
 			_vertices[2]=_marginCenters[2].plus(_marginCenters[3]);
 			_vertices[3]=_marginCenters[3].plus(_marginCenters[0]);
 		}
-		public override function isInside(vertex:Vector):Boolean{
+		public override function captures(vertex:Vector):Boolean{
 			for(var i=0;i<_marginCenters.length;i++){
-				var x=vertex.minus(_marginCenters[i]).dot(_normals[i])
+				var x=vertex.minus(_marginCenters[i].plus(samp)).dot(_normals[i]);
 				if(x>0.01){
 					return false;
 				}
@@ -100,8 +100,12 @@ package org.cove.ape {
 		public function get extents():Array {
 			return _extents;
 		}
-		public function getVertices(axis:Array):Array{
-			return _vertices;
+		public function getVertices():Array{
+			var r=new Array();
+			for(var i=0;i<_vertices.length;i++){
+				r.push(_vertices[i].plus(samp));
+			}
+			return r;
 		}
 		public function getNormals():Array{
 			return _normals;
@@ -122,87 +126,4 @@ package org.cove.ape {
 			return interval;
 		}
 	}
-	/*public class RigidRectangle extends RectangleParticle implements IRigidItem{
-		private var _av:Number;
-		private var _vertices:Array;
-		private var _marginCenters:Array;
-		private var _normals:Array;
-		private var _rigidFriction:Number;
-		
-		public function RigidRectangle (
-				x:Number, 
-				y:Number, 
-				width:Number, 
-				height:Number, 
-				rotation:Number = 0, 
-				fixed:Boolean = false,
-				mass:Number = 1, 
-				elasticity:Number = 0.3,
-				friction:Number = 0) {
-			
-			_normals=new Array();
-			_marginCenters=new Array();
-			_vertices=new Array();
-			_rigidFriction=friction;
-			for(var i=0;i<4;i++){
-				_normals.push(new Vector(0,0));
-				_marginCenters.push(new Vector(0,0));
-				_vertices.push(new Vector(0,0));
-			}
-			_av=0;
-			super(x, y, width,height,rotation,fixed, mass, elasticity, 0);
-		}
-		public function isInside(vertex:Vector):Boolean{
-			for(var i=0;i<_marginCenters.length;i++){
-				var x=vertex.minus(_marginCenters[i]).dot(_normals[i])
-				if(x>0.01){
-					return false;
-				}
-			}
-			return true;
-		}
-		public function getVertices(axis:Array):Array{
-			return _vertices;
-		}
-		public function getNormals():Array{
-			return _normals;
-		}
-		public function getMarginCenters():Array{
-			return _marginCenters;
-		}
-		public function set k(n:Number){
-			_rigidFriction=n;
-		}
-		public function get k():Number{
-			return _rigidFriction;
-		}
-		public override function update(dt2:Number):void {
-			radian+=_av*dt2;
-			super.update(dt2);
-		}
-		public function resolveRigidCollision(
-				aa:Number, mtd:Vector, vel:Vector, n:Vector, 
-				d:Number, o:int, p:AbstractParticle):void {
-			_av+=aa * MathUtil.PI_OVER_ONE_EIGHTY;
-			resolveCollision(mtd,vel,n,d,o,p);
-		}
-		//private function setAxes(t:Number):void
-		internal override function setAxes(t:Number):void {
-			super.setAxes(t);
-			_normals[0].copy(axes[0]);
-			_normals[1].copy(axes[1]);
-			_normals[2]=axes[0].mult(-1);
-			_normals[3]=axes[1].mult(-1);
-			//.plusEquals(curr)
-			_marginCenters[0]=axes[0].mult( extents[0]);
-			_marginCenters[1]=axes[1].mult( extents[1]);
-			_marginCenters[2]=axes[0].mult(-extents[0]);
-			_marginCenters[3]=axes[1].mult(-extents[1]);
-			//.minusEquals(curr)
-			_vertices[0]=_marginCenters[0].plus(_marginCenters[1]);
-			_vertices[1]=_marginCenters[1].plus(_marginCenters[2]);
-			_vertices[2]=_marginCenters[2].plus(_marginCenters[3]);
-			_vertices[3]=_marginCenters[3].plus(_marginCenters[0]);
-		}
-	}*/
 }

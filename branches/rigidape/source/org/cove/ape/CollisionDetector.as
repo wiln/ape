@@ -29,7 +29,7 @@ TODO:
 package org.cove.ape {
 	
 
-	internal final class CollisionDetector {	
+	internal class CollisionDetector {	
 		
 		private static var cpa:AbstractParticle;
 		private static var cpb:AbstractParticle;
@@ -139,21 +139,20 @@ package org.cove.ape {
 				objA:AbstractParticle, objB:AbstractParticle):Boolean {	
 			//Following code was added for rigidAPE
 			if (objA is RigidItem && objB is RigidItem) {
-				RigidCollisionDector.test(objA as RigidItem,objB as RigidItem);
-				return false;
+				return testTypes2(objA,objB);
 			}
 			//end of RigidAPE code
 			if (objA is RectangleParticle && objB is RectangleParticle) {
-				return testOBBvsOBB(objA as RectangleParticle, objB as RectangleParticle);
+				return testOBBvsOBB(objA, objB);
 			
 			} else if (objA is CircleParticle && objB is CircleParticle) {
-				return testCirclevsCircle(objA as CircleParticle, objB as CircleParticle);
+				return testCirclevsCircle(objA, objB);
 				
 			} else if (objA is RectangleParticle && objB is CircleParticle) {
-				return testOBBvsCircle(objA as RectangleParticle, objB as CircleParticle);
+				return testOBBvsCircle(objA, objB);
 				
 			} else if (objA is CircleParticle && objB is RectangleParticle)  {
-				return testOBBvsCircle(objB as RectangleParticle, objA as CircleParticle);
+				return testOBBvsCircle(objB, objA);
 			}
 			
 			return false;
@@ -166,10 +165,10 @@ package org.cove.ape {
 		 * CollisionResolver for handling.
 		 */
 		private static function testOBBvsOBB(
-				ra:RectangleParticle, rb:RectangleParticle):Boolean {
+				ra, rb):Boolean {
 			
 			collDepth = Number.POSITIVE_INFINITY;
-			
+			//trace(ra);
 			for (var i:int = 0; i < 2; i++) {
 		
 			    var axisA:Vector = ra.axes[i];
@@ -204,7 +203,7 @@ package org.cove.ape {
 		 * then passes it off to the CollisionResolver.
 		 */
 		private static function testOBBvsCircle(
-				ra:RectangleParticle, ca:CircleParticle):Boolean {
+				ra, ca):Boolean {
 			 
 			collDepth = Number.POSITIVE_INFINITY;
 			var depths:Array = new Array(2);
@@ -256,7 +255,7 @@ package org.cove.ape {
 		 * for handling.
 		 */	
 		private static function testCirclevsCircle(
-				ca:CircleParticle, cb:CircleParticle):Boolean {
+				ca, cb):Boolean {
 			
 			var depthX:Number = testIntervals(ca.getIntervalX(), cb.getIntervalX());
 			if (depthX == 0) return false;
@@ -297,7 +296,7 @@ package org.cove.ape {
 		/**
 		 * Returns the location of the closest vertex on r to point p
 		 */
-	 	private static function closestVertexOnOBB(p:Vector, r:RectangleParticle):Vector {
+	 	private static function closestVertexOnOBB(p:Vector, r):Vector {
 	
 			var d:Vector = p.minus(r.samp);
 			var q:Vector = new Vector(r.samp.x, r.samp.y);
@@ -311,6 +310,80 @@ package org.cove.ape {
 				q.plusEquals(r.axes[i].mult(dist));
 			}
 			return q;
+		}
+		private static var hitpoint:Vector=new Vector();
+
+		private static function testTypes2(
+				objA:AbstractParticle, objB:AbstractParticle):Boolean {
+			var result=false;
+			var result2=false;
+			if (objA is RigidRectangle && objB is RigidRectangle) {
+				//trace(objA+" "+objB);
+				result = testOBBvsOBB(objA, objB);
+				if(result){
+					result2=findHitPointRR(objA as RigidRectangle,objB as RigidRectangle);
+				}
+			} else if (objA is RigidCircle && objB is RigidCircle) {
+				result = testCirclevsCircle(objA, objB);
+				if(result){
+					result2=findHitPointCC(objA as RigidCircle,objB as RigidCircle);
+				}
+			} else if (objA is RigidRectangle && objB is RigidCircle) {
+				result = testOBBvsCircle(objA, objB);
+				if(result){
+					result2=findHitPointRC(objA as RigidRectangle,objB as RigidCircle);
+				}
+			} else if (objA is RigidCircle && objB is RigidRectangle)  {
+				result = testOBBvsCircle(objB, objA);
+				if(result){
+					result2=findHitPointRC(objB as RigidRectangle,objA as RigidCircle);
+					if(result2){
+						RigidCollisionResolver.resolve(objB,objA,hitpoint,collNormal,collDepth);
+						return false;
+					}
+				}
+			}
+			if(result2){
+				RigidCollisionResolver.resolve(objA,objB,hitpoint,collNormal,collDepth);
+				return false;
+			}else{
+				return result;
+			}
+		}
+		internal static function captures(r:RigidItem,vertices:Array){
+			//trace(r+" "+vertices);
+			for(var i=0;i<vertices.length;i++){
+				if(r.captures(vertices[i])){
+					hitpoint.copy(vertices[i]);
+					return true;
+				}
+			}
+			return false;
+		}
+		internal static function findHitPointRR(a:RigidRectangle,b:RigidRectangle):Boolean{
+			if(captures(a,b.getVertices())){
+				return true;
+			}else{
+				return captures(b,a.getVertices());
+			}
+		}
+		internal static function findHitPointRC(a:RigidRectangle,b:RigidCircle):Boolean{
+			//trace("r v c");
+			if(captures(b,a.getVertices())){
+				return true;
+			}else{
+				return captures(a,b.getVertices(a.getNormals()));
+			}
+		}
+		internal static function findHitPointCC(a:RigidCircle,b:RigidCircle):Boolean{
+			//trace("c v c");
+			var d=b.samp.minus(a.samp);
+			if(d.magnitude()<=(a.range+b.range)){
+				hitpoint.copy(d.normalize().multEquals(a.range).plusEquals(a.samp));
+				return true;
+			}else{
+				return false;
+			}
 		}
 	}
 }
