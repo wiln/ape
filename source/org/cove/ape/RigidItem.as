@@ -22,6 +22,7 @@
 			_frictionalCoefficient=friction;
 			_radian=radian;
 			_angularVelocity=angularVelocity;
+			torque=0;
 			super(x,y,isFixed,mass,elasticity,0);
 		}
 		public override function init():void {
@@ -69,13 +70,20 @@
 			return _range;
 		}
 		public override function update(dt2:Number):void {
-			_angularVelocity*=0.99;
-			radian+=_angularVelocity*dt2;
+			//_angularVelocity*=0.99;
+			angularVelocity+=torque*dt2;
+			radian+=angularVelocity*APEngine.damping;
 			super.update(dt2);
+			torque=0;
+		}
+		public function addTorque(aa){
+			torque+=aa;
 		}
 		public function resolveRigidCollision(aa:Number,fr:Vector,p):void{
 			if (fixed || (! solid) || (! p.solid)) return;
-			_angularVelocity+=aa/10;
+			addTorque(aa);
+			//_angularVelocity+=aa/10;
+			//_torque=aa;
 			//curr.plusEquals(fr);
 		}
 		public function captures(vertex:Vector):Boolean{
@@ -91,7 +99,9 @@
 			//trace(vertex);
 			var arm=vertex.minus(samp);
 			var v=arm.normalize();
-			return new Vector(-v.y,v.x).multEquals(_angularVelocity*arm.magnitude()).plusEquals(velocity);
+			var r=angularVelocity*arm.magnitude();
+			var d=new Vector(-v.y,v.x).multEquals(r)
+			return d.plusEquals(velocity);
 		}
 	}
 }

@@ -311,12 +311,15 @@ package org.cove.ape {
 			}
 			return q;
 		}
-		private static var hitpoint:Vector=new Vector();
+		private static var hitpoint:Array=new Array();
+		private static var hp:Vector=new Vector();
+		//:Vector=new Vector();
 
 		private static function testTypes2(
 				objA:AbstractParticle, objB:AbstractParticle):Boolean {
 			var result=false;
 			var result2=false;
+			hitpoint=new Array();
 			if (objA is RigidRectangle && objB is RigidRectangle) {
 				//trace(objA+" "+objB);
 				result = testOBBvsOBB(objA, objB);
@@ -338,48 +341,69 @@ package org.cove.ape {
 				if(result){
 					result2=findHitPointRC(objB as RigidRectangle,objA as RigidCircle);
 					if(result2){
-						RigidCollisionResolver.resolve(objB,objA,hitpoint,collNormal,collDepth);
+						getHP();
+						RigidCollisionResolver.resolve(objB,objA,hp,collNormal,collDepth);
 						return false;
 					}
 				}
 			}
 			if(result2){
-				RigidCollisionResolver.resolve(objA,objB,hitpoint,collNormal,collDepth);
+				getHP();
+				RigidCollisionResolver.resolve(objA,objB,hp,collNormal,collDepth);
 				return false;
 			}else{
 				return result;
 			}
 		}
+		internal static function getHP():void{
+			hp=new Vector();
+			for(var i=0;i<hitpoint.length;i++){
+				hp.plusEquals(hitpoint[i]);
+			}
+			if(hitpoint.length>1){
+				//trace(hitpoint.length+" hitpoints");
+				hp.multEquals(1/hitpoint.length);
+			}
+		}
 		internal static function captures(r:RigidItem,vertices:Array){
 			//trace(r+" "+vertices);
+			var re=false;
 			for(var i=0;i<vertices.length;i++){
 				if(r.captures(vertices[i])){
-					hitpoint.copy(vertices[i]);
-					return true;
+					//hitpoint.copy(vertices[i]);
+					hitpoint.push(vertices[i]);
+					re= true;
 				}
 			}
-			return false;
+			return re;
 		}
 		internal static function findHitPointRR(a:RigidRectangle,b:RigidRectangle):Boolean{
+			var r=false;
 			if(captures(a,b.getVertices())){
-				return true;
-			}else{
-				return captures(b,a.getVertices());
+				r = true;
 			}
+			if(captures(b,a.getVertices())){
+				r=true;
+			}
+			return r;
 		}
 		internal static function findHitPointRC(a:RigidRectangle,b:RigidCircle):Boolean{
 			//trace("r v c");
+			var r=false;
 			if(captures(b,a.getVertices())){
-				return true;
-			}else{
-				return captures(a,b.getVertices(a.getNormals()));
+				r = true;
 			}
+			if(captures(a,b.getVertices(a.getNormals()))){
+				r = true;
+			}
+			return r;
 		}
 		internal static function findHitPointCC(a:RigidCircle,b:RigidCircle):Boolean{
 			//trace("c v c");
 			var d=b.samp.minus(a.samp);
 			if(d.magnitude()<=(a.range+b.range)){
-				hitpoint.copy(d.normalize().multEquals(a.range).plusEquals(a.samp));
+				//hitpoint.copy(d.normalize().multEquals(a.range).plusEquals(a.samp));
+				hitpoint.push(d.normalize().multEquals(a.range).plusEquals(a.samp));
 				return true;
 			}else{
 				return false;

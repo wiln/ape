@@ -40,7 +40,7 @@ package org.cove.ape {
 				elasticity:Number=0.3,
 				friction:Number=0.2,
 				angularVelocity:Number=0) {
-			super(x,y,Math.sqrt(width*width/4+height*height/4),isFixed,mass,elasticity,friction,radian,angularVelocity);
+			super(x,y,Math.sqrt(width*width/4+height*height/4),isFixed,width*height,elasticity,friction,radian,angularVelocity);
 			_extents = new Array(width/2, height/2);
 			_axes = new Array(new Vector(0,0), new Vector(0,0));
 			_normals=new Array();

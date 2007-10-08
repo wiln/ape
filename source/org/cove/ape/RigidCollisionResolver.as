@@ -23,6 +23,59 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package org.cove.ape {
 	public class RigidCollisionResolver{
 		static public function resolve(pa,pb,hitpoint,normal,depth){
+            var mtd:Vector = normal.mult(depth);           
+            var te:Number = pa.elasticity + pb.elasticity;
+            var sumInvMass:Number = pa.invMass + pb.invMass;
+            
+            // the total friction in a collision is combined but clamped to [0,1]
+            var tf:Number = MathUtil.clamp(1 - (pa.friction + pb.friction), 0, 1);
+            
+            // get the collision components, vn and vt
+            var ca:Collision = pa.getComponents(normal);
+            var cb:Collision = pb.getComponents(normal);
+
+             // calculate the coefficient of restitution as the normal component
+            var vnA:Vector = (cb.vn.mult((te + 1) * pa.invMass).plus(
+            		ca.vn.mult(pb.invMass - te * pa.invMass))).divEquals(sumInvMass);
+            var vnB:Vector = (ca.vn.mult((te + 1) * pb.invMass).plus(
+            		cb.vn.mult(pa.invMass - te * pb.invMass))).divEquals(sumInvMass);
+            
+            // apply friction to the tangental component
+            ca.vt.multEquals(tf);
+            cb.vt.multEquals(tf);
+            
+            // scale the mtd by the ratio of the masses. heavier particles move less 
+            var mtdA:Vector = mtd.mult( pa.invMass / sumInvMass);     
+            var mtdB:Vector = mtd.mult(-pb.invMass / sumInvMass);
+            
+            // add the tangental component to the normal component for the new velocity 
+            vnA.plusEquals(ca.vt);
+            vnB.plusEquals(cb.vt);
+			//insert
+			//friction
+			//var vpa=pa.getVelocityOn(hitpoint);
+			//var vpb=pb.getVelocityOn(hitpoint);
+			//var dv=vpa.minus(vpb);
+			//var vr=dv.minus(normal.mult(dv.dot(normal)));
+			//var vra=vr.mult( depth*pa.invMass / sumInvMass);
+			//var vrb=vr.mult(-depth*pb.invMass / sumInvMass);
+			//rotation
+			var dva=vnA.minus(pa.velocity);
+			var dvb=vnB.minus(pb.velocity);
+			var aaa=hitpoint.minus(pa.samp).cross(dva)/60;
+			var aab=hitpoint.minus(pb.samp).cross(dvb)/60;
+			//resolve it
+			pa.resolveRigidCollision(aaa,new Vector(),pb);
+			pb.resolveRigidCollision(aab,new Vector(),pa);
+			//vnA.plusEquals(dva.mult(0.1));
+			//vnB.plusEquals(dvb.mult(0.1));
+			//end insert
+			
+			pa.resolveCollision(mtdA, vnA, normal, depth, -1, pb);
+			pb.resolveCollision(mtdB, vnB, normal, depth,  1, pa);
+			//
+
+
 			/*var vpa=pa.getVelocityOn(hitpoint);
 			var vpb=pb.getVelocityOn(hitpoint);
 			//trace(vpa+" "+vpb);
@@ -41,7 +94,7 @@ package org.cove.ape {
 			//trace(vr+" "+fr);
 			pa.resolveRigidCollision(aaa,fr,pb);
 			pb.resolveRigidCollision(aab,fr.mult(-1),pa);*/
-			var va=pa.velocity;
+			/*var va=pa.velocity;
 			var vb=pb.velocity;
 			CollisionResolver.resolve(pa,pb,normal,depth);
 			va=pa.velocity.minus(va);
@@ -49,7 +102,7 @@ package org.cove.ape {
 			var aaa=hitpoint.minus(pa.samp).cross(va)/10;
 			var aab=hitpoint.minus(pb.samp).cross(vb)/10;
 			pa.resolveRigidCollision(aaa,new Vector(),pb);
-			pb.resolveRigidCollision(aab,new Vector(),pa);
+			pb.resolveRigidCollision(aab,new Vector(),pa);*/
 		}
 	}
 }
