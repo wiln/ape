@@ -24,7 +24,7 @@
 			surfaces.addParticle(wall);
 			surfaces.addParticle(wall2);
 			surfaces.addParticle(ground);
-			surfaces.addParticle(new RigidRectangle(290, 300, 140,5,0.2,true,1,0.3,1));
+			surfaces.addParticle(new RigidRectangle(290, 300, 140,5,-0.3,true,1,0.3,1));
 			//, 40, 0.3, true));
 			/*surfaces.addParticle(new RigidRectangle(420, 200, 280, 5, -0.3, true));
 			surfaces.addParticle(new RigidRectangle(220, 300, 280, 5, 0.3, true));
