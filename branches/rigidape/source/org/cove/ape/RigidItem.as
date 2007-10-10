@@ -7,13 +7,15 @@
 		private var _prevRadian:Number;
 		private var torque:Number;
 		private var _range:Number;
+		private var _mi:Number;
 		
 		function RigidItem(
 				x:Number, 
 				y:Number, 
 				range:Number,
 				isFixed:Boolean, 
-				mass:Number=1, 
+				mass:Number=1,
+				mi:Number=-1,
 				elasticity:Number=0.3,
 				friction:Number=0.2,
 				radian:Number=0,
@@ -23,6 +25,11 @@
 			_radian=radian;
 			_angularVelocity=angularVelocity;
 			torque=0;
+			if(mi==-1){
+				_mi=mass;
+			}else{
+				_mi=mi;
+			}
 			super(x,y,isFixed,mass,elasticity,0);
 		}
 		public override function init():void {
@@ -69,15 +76,19 @@
 		public function get range():Number{
 			return _range;
 		}
+		public function get mi():Number{
+			return _mi;
+		}
 		public override function update(dt2:Number):void {
 			//_angularVelocity*=0.99;
-			angularVelocity+=torque*dt2;
+			//angularVelocity+=torque;
 			radian+=angularVelocity*APEngine.damping;
 			super.update(dt2);
 			torque=0;
 		}
 		public function addTorque(aa){
-			torque+=aa;
+			//torque+=aa;
+			angularVelocity+=aa;
 		}
 		public function resolveRigidCollision(aa:Number,fr:Vector,p):void{
 			if (fixed || (! solid) || (! p.solid)) return;

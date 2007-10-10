@@ -23,15 +23,43 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package org.cove.ape {
 	public class RigidCollisionResolver{
 		static public function resolve(pa,pb,hitpoint,normal,depth){
+			trace("hit "+normal+" "+depth);
             var mtd:Vector = normal.mult(depth);           
             var te:Number = pa.elasticity + pb.elasticity;
             var sumInvMass:Number = pa.invMass + pb.invMass;
-            
+            //rewrite collision resolve
+			var vap=pa.getVelocityOn(hitpoint);
+			var vbp=pb.getVelocityOn(hitpoint);
+			trace(vap+" "+vbp);
+			var vabp=vap.minus(vbp);
+			var vn=normal.mult(vabp.dot(normal));
+			var l=vabp.minus(vn).normalize();
+			var n=normal//.plus(l.mult(0.01));
+			var ra=hitpoint.minus(pa.samp);
+			var rb=hitpoint.minus(pb.samp);
+			var raxn=ra.cross(n);
+			var rbxn=rb.cross(n);
+			var j=-vabp.dot(n)*(1+0.8)/(sumInvMass+raxn*raxn/pa.mi+rbxn*rbxn/pb.mi);
+			var vna=pa.velocity.plus(n.mult( j*pa.invMass));
+			var vnb=pb.velocity.plus(n.mult(-j*pb.invMass));
+			trace(j+" "+pb.velocity+"\t+"+n.mult(-j*pb.invMass)+"\t="+vnb+" "+vna);
+			var aaa=j*raxn/pa.mi;
+			var aab=j*rbxn/pb.mi;
+			pa.resolveRigidCollision(aaa,new Vector(),pb);
+			pb.resolveRigidCollision(aab,new Vector(),pa);
+            var mtdA:Vector = mtd.mult( pa.invMass / sumInvMass);     
+            var mtdB:Vector = mtd.mult(-pb.invMass / sumInvMass);
+			pa.resolveCollision(mtdA, vna, normal, depth, -1, pb);
+			pb.resolveCollision(mtdB, vnb, normal, depth,  1, pa);
+			//end collision resolve
+		}
+	}
+}
             // the total friction in a collision is combined but clamped to [0,1]
-            var tf:Number = MathUtil.clamp(1 - (pa.friction + pb.friction), 0, 1);
+            //var tf:Number = MathUtil.clamp(1 - (pa.friction + pb.friction), 0, 1);
             
             // get the collision components, vn and vt
-            var ca:Collision = pa.getComponents(normal);
+            /*var ca:Collision = pa.getComponents(normal);
             var cb:Collision = pb.getComponents(normal);
 
              // calculate the coefficient of restitution as the normal component
@@ -41,8 +69,8 @@ package org.cove.ape {
             		cb.vn.mult(pa.invMass - te * pb.invMass))).divEquals(sumInvMass);
             
             // apply friction to the tangental component
-            ca.vt.multEquals(tf);
-            cb.vt.multEquals(tf);
+            //ca.vt.multEquals(tf);
+            //cb.vt.multEquals(tf);
             
             // scale the mtd by the ratio of the masses. heavier particles move less 
             var mtdA:Vector = mtd.mult( pa.invMass / sumInvMass);     
@@ -62,8 +90,8 @@ package org.cove.ape {
 			//rotation
 			var dva=vnA.minus(pa.velocity);
 			var dvb=vnB.minus(pb.velocity);
-			var aaa=hitpoint.minus(pa.samp).cross(dva)/60;
-			var aab=hitpoint.minus(pb.samp).cross(dvb)/60;
+			var aaa=hitpoint.minus(pa.samp).cross(mtdA)/10;
+			var aab=hitpoint.minus(pb.samp).cross(mtdB)/10;
 			//resolve it
 			pa.resolveRigidCollision(aaa,new Vector(),pb);
 			pb.resolveRigidCollision(aab,new Vector(),pa);
@@ -103,6 +131,3 @@ package org.cove.ape {
 			var aab=hitpoint.minus(pb.samp).cross(vb)/10;
 			pa.resolveRigidCollision(aaa,new Vector(),pb);
 			pb.resolveRigidCollision(aab,new Vector(),pa);*/
-		}
-	}
-}

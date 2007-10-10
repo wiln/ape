@@ -136,7 +136,7 @@ package org.cove.ape {
 			
 					
 		public function toString():String {
-			return (x + " : " + y);
+			return ("("+Math.floor(x*100)/100 + "," + Math.floor(y*100)/100+")");
 		}
 	}
 }

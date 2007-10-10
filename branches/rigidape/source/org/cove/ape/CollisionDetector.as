@@ -138,8 +138,10 @@ package org.cove.ape {
 		private static function testTypes(
 				objA:AbstractParticle, objB:AbstractParticle):Boolean {	
 			//Following code was added for rigidAPE
+			//trace((objA is RigidItem) +" "+ (objB is RigidItem));
 			if (objA is RigidItem && objB is RigidItem) {
-				return testTypes2(objA,objB);
+				testTypes2(objA,objB);
+				return false;
 			}
 			//end of RigidAPE code
 			if (objA is RectangleParticle && objB is RectangleParticle) {
