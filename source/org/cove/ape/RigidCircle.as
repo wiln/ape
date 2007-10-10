@@ -29,13 +29,16 @@ package org.cove.ape {
 				y:Number, 
 				radius:Number,
 				isFixed:Boolean=false, 
-				mass:Number=1, 
+				mass:Number=-1, 
 				elasticity:Number=0.3,
 				friction:Number=0.2,
 				radian:Number=0,
 				angularVelocity:Number=0) {
 			_radius=radius;
-			super(x,y,radius,isFixed,mass*radius*radius/2,elasticity,friction,radian,angularVelocity);
+			if(mass==-1){
+				mass=Math.PI*radius*radius;
+			}
+			super(x,y,radius,isFixed,mass,mass*radius*radius/2,elasticity,friction,radian,angularVelocity);
 		}
 		public function get radius():Number{
 			return _radius;
