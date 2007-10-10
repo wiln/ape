@@ -24,19 +24,23 @@
 			surfaces.addParticle(wall);
 			surfaces.addParticle(wall2);
 			surfaces.addParticle(ground);
-			surfaces.addParticle(new RigidRectangle(290, 300, 140,5,-0.3,true,1,0.3,1));
+			//surfaces.addParticle(new RigidRectangle(290, 300, 140,5,-0.3,true,1,0.3,1));
 			//, 40, 0.3, true));
-			/*surfaces.addParticle(new RigidRectangle(420, 200, 280, 5, -0.3, true));
+			surfaces.addParticle(new RigidRectangle(420, 200, 280, 5, -0.3, true));
 			surfaces.addParticle(new RigidRectangle(220, 300, 280, 5, 0.3, true));
-			surfaces.addParticle(new RigidCircle(500,120,10,true));
-			surfaces.addParticle(new RigidCircle(460,130,10,true));*/
+			//surfaces.addParticle(new RigidCircle(500,120,10,true));
+			//surfaces.addParticle(new RigidCircle(460,130,10,true));
 			APEngine.addGroup(surfaces);
 			balls = new Group();
 			APEngine.addGroup(balls);
 			var randomX:Number = 330;
 			//Math.random()*300+100;
-			balls.addParticle(new RigidCircle(randomX, 30, 40,false,1,0.3,1));
-			//balls.addParticle(new RigidRectangle(randomX, 30, 40, 20,0.1,false,1,0.1,0.1));
+			balls.addParticle(new RigidCircle(randomX, 30, 20));
+			balls.addParticle(new RigidCircle(randomX+150, 0, 20));
+			balls.addParticle(new RigidCircle(randomX-100, 30, 20));
+			// balls.addParticle(new RigidRectangle(randomX, 30, 40, 20,0.1,false,-1,0.3,0.2,0));
+			// balls.addParticle(new RigidRectangle(randomX, 90, 40, 20,0.2,false,-1,0.3,0.2,0));
+			// balls.addParticle(new RigidRectangle(randomX, 150, 40, 20,0.3,false,-1,0.3,0.2,0));
 			//balls.addParticle(new RigidRectangle(randomX, 130, 40,20,0.1,false,1,0.1,0.1));
 			//balls.addParticle(new RigidRectangle(randomX+50, 30, 40,20,0,false,1,0.1,0.1));
 			//balls.addParticle(new RigidRectangle(randomX-50, 30, 40,20,0,false,1,0.1,0.1));
@@ -60,7 +64,7 @@
 			if (keyboardEvent.keyCode == 38) {
 				//p1.addMasslessForce(new Vector(0, -1));
 				if(Math.random()<0.5){
-					balls.addParticle(new RigidRectangle(Math.random()*450+100, 20, Math.random()*20+20,Math.random()*20+20,Math.random()*1.6,false,1,0.1,0.1));
+					balls.addParticle(new RigidRectangle(Math.random()*450+100, 20, Math.random()*20+20,Math.random()*20+20,Math.random()*1.6));
 					//,false,1,0.1,0.1
 				}else{
 					balls.addParticle(new RigidCircle(Math.random()*450+100, 20, Math.random()*10+10));

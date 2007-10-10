@@ -36,10 +36,13 @@ package org.cove.ape {
 				height:Number,
 				radian:Number=0,
 				isFixed:Boolean=false, 
-				mass:Number=1, 
+				mass:Number=-1, 
 				elasticity:Number=0.3,
 				friction:Number=0.2,
 				angularVelocity:Number=0) {
+			if(mass==-1){
+				mass=width*height;
+			}
 			super(x,y,Math.sqrt(width*width/4+height*height/4),isFixed,mass,mass*(width*width+height*height)/12,elasticity,friction,radian,angularVelocity);
 			_extents = new Array(width/2, height/2);
 			_axes = new Array(new Vector(0,0), new Vector(0,0));

@@ -1,4 +1,26 @@
-﻿package org.cove.ape {
+﻿/*
+Copyright (c)2007 Frank Li
+miian.com
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this 
+software and associated documentation files (the "Software"), to deal in the Software 
+without restriction, including without limitation the rights to use, copy, modify, 
+merge, publish, distribute, sublicense, and/or sell copies of the Software, and to 
+permit persons to whom the Software is furnished to do so, subject to the following 
+conditions:
+
+The above copyright notice and this permission notice shall be included in all copies 
+or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT 
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
+OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+package org.cove.ape {
 	
 	public class RigidItem extends AbstractParticle{
 		private var _angularVelocity:Number;
@@ -25,12 +47,16 @@
 			_radian=radian;
 			_angularVelocity=angularVelocity;
 			torque=0;
-			if(mi==-1){
+			if(isFixed){
+				mass=Number.POSITIVE_INFINITY;
+				_mi=Number.POSITIVE_INFINITY;
+			}else if(mi==-1){
 				_mi=mass;
 			}else{
 				_mi=mi;
 			}
 			super(x,y,isFixed,mass,elasticity,0);
+			setStyle(0,0xffffff,1,0x000000,1);
 		}
 		public override function init():void {
 			cleanup();
@@ -89,8 +115,11 @@
 		public function addTorque(aa){
 			//torque+=aa;
 			angularVelocity+=aa;
+			if(Math.abs(aa)>0.03){
+				trace(">>>>>>"+angularVelocity+" "+aa);
+			}
 		}
-		public function resolveRigidCollision(aa:Number,fr:Vector,p):void{
+		public function resolveRigidCollision(aa:Number,p):void{
 			if (fixed || (! solid) || (! p.solid)) return;
 			addTorque(aa);
 			//_angularVelocity+=aa/10;
