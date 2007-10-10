@@ -35,7 +35,7 @@ package org.cove.ape {
 				radian:Number=0,
 				angularVelocity:Number=0) {
 			_radius=radius;
-			super(x,y,radius,isFixed,Math.PI*radius*radius,elasticity,friction,radian,angularVelocity);
+			super(x,y,radius,isFixed,mass*radius*radius/2,elasticity,friction,radian,angularVelocity);
 		}
 		public function get radius():Number{
 			return _radius;

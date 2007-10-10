@@ -34,7 +34,7 @@ package org.cove.ape {
         
         internal static function resolve (pa:AbstractParticle, pb:AbstractParticle, 
                 normal:Vector, depth:Number):void {
-			//trace(normal+" "+depth);
+			trace("normal hit "+normal+" "+depth);
             var mtd:Vector = normal.mult(depth);           
             var te:Number = pa.elasticity + pb.elasticity;
             var sumInvMass:Number = pa.invMass + pb.invMass;

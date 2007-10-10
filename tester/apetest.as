@@ -35,8 +35,8 @@
 			APEngine.addGroup(balls);
 			var randomX:Number = 330;
 			//Math.random()*300+100;
-			//balls.addParticle(new RigidCircle(randomX, 30, 40,false,1,0.3,1));
-			balls.addParticle(new RigidRectangle(randomX, 30, 40, 20,0.1,false,1,0.1,0.1));
+			balls.addParticle(new RigidCircle(randomX, 30, 40,false,1,0.3,1));
+			//balls.addParticle(new RigidRectangle(randomX, 30, 40, 20,0.1,false,1,0.1,0.1));
 			//balls.addParticle(new RigidRectangle(randomX, 130, 40,20,0.1,false,1,0.1,0.1));
 			//balls.addParticle(new RigidRectangle(randomX+50, 30, 40,20,0,false,1,0.1,0.1));
 			//balls.addParticle(new RigidRectangle(randomX-50, 30, 40,20,0,false,1,0.1,0.1));
