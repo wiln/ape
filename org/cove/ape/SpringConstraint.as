@@ -289,8 +289,8 @@ package org.cove.ape {
 		/**
 		 * Returns true if both connected particle's <code>fixed</code> property is true.
 		 */
-		public function get fixed():Boolean {
-			return (p1.fixed && p2.fixed);
+		public function get fixedPosition():Boolean {
+			return (p1.fixedPosition && p2.fixedPosition);
 		}
 		
 		
@@ -386,7 +386,7 @@ package org.cove.ape {
 		 */			
 		public override function resolve():void {
 			
-			if (p1.fixed && p2.fixed || _broken) return;
+			if (p1.fixedPosition && p2.fixedPosition || _broken) return;
 			
 			var deltaLength:Number = currLength;
 			if(this._breakable){

@@ -33,7 +33,8 @@ package org.cove.ape {
 	 */
 	public class CircleParticle extends AbstractParticle {
 	
-		private var _radius:Number;
+		internal var _radius:Number;
+		internal var _density:Number;
 		
 		
 		/**
@@ -51,12 +52,12 @@ package org.cove.ape {
 				x:Number, 
 				y:Number, 
 				radius:Number, 
-				fixed:Boolean = false,
+				fixedPosition:Boolean = false,
 				mass:Number = 1, 
-				elasticity:Number = 0.3,
-				friction:Number = 0) {
+				elasticity:Number = 0.15,
+				friction:Number = 0.1) {
 					
-			super(x, y, fixed, mass, elasticity, friction);
+			super(x, y, fixedPosition, mass, elasticity, friction);
 			_radius = radius;
 		}
 
@@ -67,7 +68,6 @@ package org.cove.ape {
 			return _radius;
 		}		
 		
-		
 		/**
 		 * @private
 		 */
@@ -75,6 +75,20 @@ package org.cove.ape {
 			_radius = r;
 		}
 		
+		internal function set density(d:Number):void{
+			_density = d;
+			mass = calculateMass();
+		}
+		
+		internal function get density():Number{
+			return _density;
+		}
+		
+		internal function calculateMass():Number{
+			var area:Number = Math.PI * Math.pow(_radius, 2);
+			var m:Number = _density * area;
+			return m;
+		}		
 		
 		/**
 		 * Sets up the visual representation of this CircleParticle. This method is called 
@@ -137,6 +151,20 @@ package org.cove.ape {
 			interval.min = curr.y - _radius;
 			interval.max = curr.y + _radius;
 			return interval;
+		}
+		
+		public override function leftMostXValue():Number{
+			if(!isNaN(lmx) && fixedPosition) return lmx;
+			
+			lmx = curr.x - radius;
+			return lmx;
+		}
+		
+		public override function rightMostXValue():Number{
+			if(!isNaN(rmx) && fixedPosition) return rmx;
+			
+			rmx = curr.x + radius;
+			return rmx;
 		}
 	}
 }

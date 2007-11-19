@@ -72,9 +72,9 @@ package org.cove.ape {
 		 * set all of this Composite's component particles to that value. Getting this 
 		 * value will return false if any of the component particles are not fixed.
 		 */	
-		public function get fixed():Boolean {
+		public function get fixedPosition():Boolean {
 			for (var i:int = 0; i < particles.length; i++) {
-				if (! particles[i].fixed) return false;	
+				if (! particles[i].fixedPosition) return false;	
 			}
 			return true;
 		}
@@ -83,9 +83,9 @@ package org.cove.ape {
 		/**
 		 * @private
 		 */		
-		public function set fixed(b:Boolean):void {
+		public function set fixedPosition(b:Boolean):void {
 			for (var i:int = 0; i < particles.length; i++) {
-				particles[i].fixed = b;	
+				particles[i].fixedPosition = b;	
 			}
 		}
 		

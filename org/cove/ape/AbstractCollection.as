@@ -159,12 +159,13 @@ package org.cove.ape {
 			var p:AbstractParticle;
 			for (var i:int = 0; i < _particles.length; i++) {
 				p = _particles[i];
-				if ((! p.fixed) || p.alwaysRepaint) p.paint();	
+				//if ((! p.fixed) || p.alwaysRepaint) p.paint();
+				p.paint();
 			}
 			
 			for (i = 0; i < _constraints.length; i++) {
-				var sc:SpringConstraint = _constraints[i];
-				if ((! sc.fixed) || sc.alwaysRepaint) sc.paint();
+				var sc:AbstractConstraint = _constraints[i];
+				if (sc.alwaysRepaint) sc.paint();
 			}
 		}
 		
@@ -272,10 +273,12 @@ package org.cove.ape {
 				// ...vs every other constraint in this AbstractCollection
 				//var clen:int = _constraints.length;
 				for (var n:int = 0; n < _constraints.length; n++) {
-					var c:SpringConstraint = _constraints[n];
-					if (c.collidable && ! c.isConnectedTo(pa)) {
-						c.scp.updatePosition();
-						CollisionDetector.test(pa, c.scp);
+					if(_constraints[n] is SpringConstraint){
+						var c:SpringConstraint = _constraints[n];
+						if (c.collidable && ! c.isConnectedTo(pa)) {
+							c.scp.updatePosition();
+							CollisionDetector.test(pa, c.scp);
+						}
 					}
 				}
 			}
@@ -303,10 +306,12 @@ package org.cove.ape {
 				// ...vs every constraint in the other collection
 				//var acclen:int = ac.constraints.length;
 				for (x = 0; x < ac.constraints.length; x++) {
-					var cgb:SpringConstraint = ac.constraints[x];
-					if (cgb.collidable && ! cgb.isConnectedTo(pga)) {
-						cgb.scp.updatePosition();
-						CollisionDetector.test(pga, cgb.scp);
+					if(ac.constraints[x] is SpringConstraint){
+						var cgb:SpringConstraint = ac.constraints[x];
+						if (cgb.collidable && ! cgb.isConnectedTo(pga)) {
+							cgb.scp.updatePosition();
+							CollisionDetector.test(pga, cgb.scp);
+						}
 					}
 				}
 			}
@@ -314,16 +319,18 @@ package org.cove.ape {
 			// every constraint in this collection...
 			//var clen:int = _constraints.length;
 			for (j = 0; j < _constraints.length; j++) {
-				var cga:SpringConstraint = _constraints[j];
-				if (cga == null || ! cga.collidable) continue;
-				
-				// ...vs every particle in the other collection
-				//acplen = ac.particles.length;
-				for (var n:int = 0; n < ac.particles.length; n++) {
-					pgb = ac.particles[n];
-					if (pgb.collidable && ! cga.isConnectedTo(pgb)) {
-						cga.scp.updatePosition();
-						CollisionDetector.test(pgb, cga.scp);
+				if(_constraints[j] is SpringConstraint){
+					var cga:SpringConstraint = _constraints[j];
+					if (cga == null || ! cga.collidable) continue;
+					
+					// ...vs every particle in the other collection
+					//acplen = ac.particles.length;
+					for (var n:int = 0; n < ac.particles.length; n++) {
+						pgb = ac.particles[n];
+						if (pgb.collidable && ! cga.isConnectedTo(pgb)) {
+							cga.scp.updatePosition();
+							CollisionDetector.test(pgb, cga.scp);
+						}
 					}
 				}
 			}

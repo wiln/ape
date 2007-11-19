@@ -1,42 +1,14 @@
-/*
-Copyright (c) 2006, 2007 Alec Cove
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this 
-software and associated documentation files (the "Software"), to deal in the Software 
-without restriction, including without limitation the rights to use, copy, modify, 
-merge, publish, distribute, sublicense, and/or sell copies of the Software, and to 
-permit persons to whom the Software is furnished to do so, subject to the following 
-conditions:
-
-The above copyright notice and this permission notice shall be included in all copies 
-or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
-PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT 
-HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
-OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
-
-/*	
-	TODO:
-	- review getProjection() for precomputing. radius can definitely be precomputed/stored
-*/
-
 package org.cove.ape {
 	
 	import flash.display.Graphics;
 	
 	/**
-	 * A rectangular shaped particle. 
+	 * A rectangular shaped particle. Use this instead of a 4 sided PolygonParticle as it is more efficient
 	 */ 
-	public class RectangleParticle extends AbstractParticle {
+	public class RectangleParticle extends PolygonParticle {
 	
 		private var _extents:Array;
-		private var _axes:Array;
-		private var _radian:Number;
-		
+		//private var _axes:Array;		
 		
 		/**
 		 * @param x The initial x position.
@@ -55,102 +27,39 @@ package org.cove.ape {
 		 * changed.
 		 * </p>
 		 */
-		public function RectangleParticle (
-				x:Number, 
-				y:Number, 
+		public function RectangleParticle(x:Number, 
+				y:Number,
 				width:Number, 
-				height:Number, 
-				rotation:Number = 0, 
+				height:Number,
+				rotation:Number = 0,
 				fixed:Boolean = false,
 				mass:Number = 1, 
-				elasticity:Number = 0.3,
-				friction:Number = 0) {
+				elasticity:Number = 0.15,
+				friction:Number = 0.1) {
+				
+				super(x, y, width, height, 4, rotation, fixed, mass, elasticity, friction);
+		}
+		
+		internal override function createVertices(width:Number, height:Number):void{
+			_vertices = new Array();
+			_originalVertices = new Array();
 			
-			super(x, y, fixed, mass, elasticity, friction);
+			_originalVertices.push(new Vector(width/2, height/2));
+			_originalVertices.push(new Vector(-width/2, height/2));
+			_originalVertices.push(new Vector(-width/2, -height/2));
+			_originalVertices.push(new Vector(width/2, -height/2));
 			
 			_extents = new Array(width/2, height/2);
 			_axes = new Array(new Vector(0,0), new Vector(0,0));
-			radian = rotation;
-		}
-		
-		
-		/**
-		 * The rotation of the RectangleParticle in radians. For drawing methods you may 
-		 * want to use the <code>angle</code> property which gives the rotation in
-		 * degrees from 0 to 360.
-		 * 
-		 * <p>
-		 * Note that while the RectangleParticle can be rotated, it does not have angular
-		 * velocity. In otherwords, during collisions, the rotation is not altered, 
-		 * and the energy of the rotation is not applied to other colliding particles.
-		 * </p>
-		 */
-		public function get radian():Number {
-			return _radian;
-		}
-		
+		}		
 		
 		/**
 		 * @private
 		 */		
-		public function set radian(t:Number):void {
-			_radian = t;
-			setAxes(t);
+		public override function set radian(t:Number):void {
+			super.radian = t;
+			//setAxes();
 		}
-			
-		
-		/**
-		 * The rotation of the RectangleParticle in degrees. 
-		 */
-		public function get angle():Number {
-			return radian * MathUtil.ONE_EIGHTY_OVER_PI;
-		}
-
-
-		/**
-		 * @private
-		 */		
-		public function set angle(a:Number):void {
-			radian = a * MathUtil.PI_OVER_ONE_EIGHTY;
-		}
-			
-		
-		/**
-		 * Sets up the visual representation of this RectangleParticle. This method is called 
-		 * automatically when an instance of this RectangleParticle's parent Group is added to 
-		 * the APEngine, when  this RectangleParticle's Composite is added to a Group, or the 
-		 * RectangleParticle is added to a Composite or Group.
-		 */				
-		public override function init():void {
-			cleanup();
-			if (displayObject != null) {
-				initDisplay();
-			} else {
-			
-				var w:Number = extents[0] * 2;
-				var h:Number = extents[1] * 2;
-				
-				sprite.graphics.clear();
-				sprite.graphics.lineStyle(lineThickness, lineColor, lineAlpha);
-				sprite.graphics.beginFill(fillColor, fillAlpha);
-				sprite.graphics.drawRect(-w/2, -h/2, w, h);
-				sprite.graphics.endFill();
-			}
-			paint();
-		}
-		
-		
-		/**
-		 * The default painting method for this particle. This method is called automatically
-		 * by the <code>APEngine.paint()</code> method. If you want to define your own custom painting
-		 * method, then create a subclass of this class and override <code>paint()</code>.
-		 */	
-		public override function paint():void {
-			sprite.x = curr.x;
-			sprite.y = curr.y;
-			sprite.rotation = angle;
-		}
-		
 		
 		public function set width(w:Number):void {
 			_extents[0] = w/2;
@@ -170,7 +79,6 @@ package org.cove.ape {
 		public function get height():Number {
 			return _extents[1] * 2
 		}
-				
 		
 		/**
 		 * @private
@@ -179,7 +87,6 @@ package org.cove.ape {
 			return _axes;
 		}
 		
-
 		/**
 		 * @private
 		 */	
@@ -187,11 +94,10 @@ package org.cove.ape {
 			return _extents;
 		}
 		
-		
 		/**
 		 * @private
 		 */	
-		internal function getProjection(axis:Vector):Interval {
+		internal override function getProjection(axis:Vector):Interval {
 			
 			var radius:Number =
 			    extents[0] * Math.abs(axis.dot(axes[0]))+
@@ -202,20 +108,42 @@ package org.cove.ape {
 			interval.min = c - radius;
 			interval.max = c + radius;
 			return interval;
-		}
+		}		
 
 
 		/**
 		 * 
 		 */					
-		private function setAxes(t:Number):void {
-			var s:Number = Math.sin(t);
-			var c:Number = Math.cos(t);
+		internal override function setAxes():void {
+			//_axes = new Array();
+			var s:Number = Math.sin(_radian);
+			var c:Number = Math.cos(_radian);
 			
-			axes[0].x = c;
-			axes[0].y = s;
-			axes[1].x = -s;
-			axes[1].y = c;
+			_axes[0].x = c;
+			_axes[0].y = s;
+			_axes[1].x = -s;
+			_axes[1].y = c;
 		}
+		
+		internal override function getAxes():Array{
+			return _axes;
+		}
+		
+		/*
+		internal override function getClosestVertex(v:Vector):Vector{
+			var d:Vector = v.minus(curr);
+			var q:Vector = new Vector(curr.x, curr.y);
+	
+			for (var i:int = 0; i < 2; i++) {
+				var dist:Number = d.dot(_axes[i]);
+	
+				if (dist >= 0) dist = _extents[i];
+				else if (dist < 0) dist = _extents[i];
+	
+				q.plusEquals(_axes[i].mult(dist));
+			}
+			return q;
+		}
+		*/
 	}
 }

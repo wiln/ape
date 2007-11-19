@@ -180,7 +180,7 @@ package org.cove.ape {
 		/**
 		 * The rotation of the wheel in radians.
 		 */
-		public function get radian():Number {
+		public override function get radian():Number {
 			orientation.setTo(rp.curr.x, rp.curr.y);
 			return Math.atan2(orientation.y, orientation.x) + Math.PI;
 		}
@@ -222,6 +222,11 @@ package org.cove.ape {
 			
 			super.resolveCollision(mtd, vel, n, d, o, p);
 			resolve(n.mult(MathUtil.sign(d * o)));
+		}
+		
+		public override function resolveVelocities(dv:Vector, dw:Number, normal:Vector):void{
+			super.resolveVelocities(dv, dw, normal);
+			resolve(normal.mult(-1));
 		}
 		
 	

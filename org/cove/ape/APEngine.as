@@ -44,7 +44,7 @@ package org.cove.ape {
 			
 		private static var groups:Array;
 		private static var numGroups:int;
-		private static var timeStep:Number;
+		internal static var timeStep:Number;
 		
 		private static var _damping:Number;
 		private static var _container:DisplayObjectContainer;
