@@ -79,8 +79,8 @@ package org.cove.ape {
 		/**
 		 * Returns true if any connected particle's <code>fixed</code> property is true.
 		 */
-		public override function get fixed():Boolean {
-			return (p1.fixed && p2.fixed && p3.fixed);
+		public override function get fixedPosition():Boolean {
+			return (p1.fixedPosition && p2.fixedPosition && p3.fixedPosition);
 		}
 		
 		public function get minAng():Number{
@@ -121,7 +121,7 @@ package org.cove.ape {
 		public override function resolve():void {
 			if (broken) return;
 			
-			var PI2:Number = Math.PI*2;
+			var PI2:Number = MathUtil.TWO_PI;
 			
 			var ang12:Number = Math.atan2(p2.curr.y - p1.curr.y, p2.curr.x - p1.curr.x);
 			var ang23:Number = Math.atan2(p3.curr.y - p2.curr.y, p3.curr.x - p2.curr.x);

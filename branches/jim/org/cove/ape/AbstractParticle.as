@@ -44,7 +44,7 @@ package org.cove.ape {
 	public class AbstractParticle extends AbstractItem {
 		
 		/** @private */
-		internal var curr:Vector;
+		public var curr:Vector;
 		/** @private */
 		internal var prev:Vector;
 		/** @private */
@@ -52,8 +52,8 @@ package org.cove.ape {
 		/** @private */
 		internal var interval:Interval;
 		
-		private var forces:Vector;
-		private var temp:Vector;
+		internal var forces:Vector;
+		internal var temp:Vector;
 		private var collision:Collision;
 		
 		private var _parent:AbstractCollection;
@@ -63,7 +63,7 @@ package org.cove.ape {
 		private var _invMass:Number;
 		private var _friction:Number;
 		
-		private var _fixed:Boolean;
+		private var _fixedPosition:Boolean;
 		private var _collidable:Boolean;
 		
 		private var _pinned:Boolean;
@@ -75,6 +75,17 @@ package org.cove.ape {
 		
 		private var _smashable:Boolean;
 		private var _maxExitVelocity:Number;
+		
+		internal var _velocity:Vector;
+		
+		internal var _atRest:Boolean;
+		
+		internal var _restLoops:int = 3; //number of engine iterations to check if a particle is resting
+		internal var _restCount:int = 0;
+		
+		//left and right most x values
+		internal var lmx:Number;
+		internal var rmx:Number;
 		
 		/** 
 		 * @private
@@ -97,7 +108,7 @@ package org.cove.ape {
 			prev = new Vector(x, y);
 			samp = new Vector();
 			temp = new Vector();
-			fixed = isFixed;
+			fixedPosition = isFixed;
 			
 			forces = new Vector();
 			collision = new Collision(new Vector(), new Vector());
@@ -111,6 +122,7 @@ package org.cove.ape {
 			
 			_center = new Vector();
 			_multisample = 0;
+			_velocity = new Vector();
 		}
 	
 		
@@ -235,16 +247,31 @@ package org.cove.ape {
 		 * The fixed state of the particle. If the particle is fixed, it does not move
 		 * in response to forces or collisions. Fixed particles are good for surfaces.
 		 */
-		public function get fixed():Boolean {
-			return _fixed;
+		public function get fixedPosition():Boolean {
+			return _fixedPosition;
 		}
 
  
 		/**
 		 * @private
 		 */
-		public function set fixed(f:Boolean):void {
-			_fixed = f;
+		public function set fixedPosition(f:Boolean):void {
+			_fixedPosition = f;
+		}
+		
+		/**
+		 * The rest state of the particle. If the particle is at rest, it skips
+		 * the integrate loop
+		 */
+		public function get atRest():Boolean {
+			return _atRest;
+		}
+
+		/**
+		 * @private
+		 */
+		public function set atRest(b:Boolean):void {
+			_atRest = b;
 		}
 		
 		/**
@@ -377,6 +404,7 @@ package org.cove.ape {
 		 * 
 		 */
 		public function get velocity():Vector {
+			//return _velocity;
 			return curr.minus(prev);
 		}
 		
@@ -385,6 +413,7 @@ package org.cove.ape {
 		 * @private
 		 */	
 		public function set velocity(v:Vector):void {
+			//_velocity = v;
 			prev = curr.minus(v);	
 		}
 		
@@ -403,6 +432,11 @@ package org.cove.ape {
 		 */		
 		public function set collidable(b:Boolean):void {
 			_collidable = b;
+			if(b){
+				sprite.alpha = 1;
+			}else{
+				sprite.alpha = .5;
+			}
 		}
 		
 		
@@ -467,13 +501,43 @@ package org.cove.ape {
 		 */
 		public function update(dt2:Number):void {
 			
-			if(_pinned){
-				position = _pinnedTo.curr.plus(_pin);
-				//prev = _pinnedTo.prev.plus(_pin);
-				return;
-			}	
+			if (fixedPosition) return;
 			
-			if (fixed) return;
+			/*
+			var diff:Number = curr.minus(prev).magnitude();
+			if(diff < .1){
+				_restCount += 1;
+				if(!_atRest && _restCount >= _restLoops){
+					_atRest = true;
+				}
+			}else{
+				_atRest = false;
+				_restCount = 0;
+			}
+			
+			if(_atRest)	return;
+			*/
+			
+			/*velocity method
+			// integrate position
+			temp.copy(curr);
+			
+			//var nv:Vector = velocity.plus(forces.multEquals(dt2));
+			//curr.plusEquals(nv.multEquals(APEngine.damping));
+			curr.plusEquals(velocity.mult(APEngine.damping));
+			prev.copy(temp);
+			
+			// global forces
+			addForce(APEngine.force);
+			addMasslessForce(APEngine.masslessForce);
+			
+			velocity.plusEquals(forces.multEquals(dt2));
+
+			// clear the forces
+			forces.setTo(0,0);
+			
+			end velocity method*/
+			
 			
 			// global forces
 			addForce(APEngine.force);
@@ -488,6 +552,8 @@ package org.cove.ape {
 
 			// clear the forces
 			forces.setTo(0,0);
+			
+			
 		}
 		
 		
@@ -520,7 +586,7 @@ package org.cove.ape {
 		public function resolveCollision(
 				mtd:Vector, vel:Vector, n:Vector, d:Number, o:int, p:AbstractParticle):void {
 			
-			if(!_fixed){
+			if(!_fixedPosition){
 				curr.plusEquals(mtd);
 				velocity = vel;
 			}
@@ -533,12 +599,18 @@ package org.cove.ape {
 			}
 		}
 		
+		public function resolveVelocities(dv:Vector, dw:Number, normal:Vector):void{
+			if(!_fixedPosition){
+				velocity = velocity.plus(dv);
+			}
+		}
+		
 		
 		/**
 		 * @private
 		 */		
-		internal function get invMass():Number {
-			return (fixed) ? 0 : _invMass; 
+		public function get invMass():Number {
+			return (fixedPosition) ? 0 : _invMass; 
 		}
 		
 		public function get parent():AbstractCollection{
@@ -547,6 +619,31 @@ package org.cove.ape {
 		
 		public function set parent(ac:AbstractCollection){
 			_parent = ac;
+		}
+		
+		//invInertia and angvelocity getters and setters are only here so we can use in collisionresolver
+		public function get invInertia():Number{
+			return 0; 
+		}
+		
+		public function get angVelocity():Number{
+			return 0;
+		}
+		
+		public function set angVelocity(n:Number):void{
+			return;
+		}
+		
+		public function get radian():Number{
+			return 0;
+		}
+		
+		public function leftMostXValue():Number{
+			return curr.x;
+		}
+		
+		public function rightMostXValue():Number{
+			return curr.x;
 		}
 	}	
 }

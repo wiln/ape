@@ -26,6 +26,8 @@ TODO:
 */
 
 package org.cove.ape {
+	import flash.filters.ColorMatrixFilter;
+	import flash.geom.Matrix;
 	
 	public class Vector {
 		
@@ -111,7 +113,19 @@ package org.cove.ape {
 		
 		
 		public function magnitude():Number {
-			return Math.sqrt(x * x + y * y);
+			//return Math.sqrt(x * x + y * y);
+			var w:Number = (x * x + y * y);
+			if(w == 0) return 0;
+			var b:Number = w * 0.25;
+			var c:Number = 0;
+			var a:Number = 0;
+			do {
+				c = w / b;
+				b = (b + c) * 0.5;
+				a = b - c;
+				if (a < 0)  a = -a;
+			} while (a > .2);
+			return b;
 		}
 
 		
@@ -132,6 +146,32 @@ package org.cove.ape {
 				
 		public function toString():String {
 			return (x + " : " + y);
+		}
+		
+		public function applyMatrix(m:Matrix):Vector {
+			var v:Vector = new Vector();
+			v.x = x * m.a + y * m.c;
+			v.y = x * m.b + y * m.d;
+			return v;			
+		}
+		
+		public function multMatrix(m:Matrix):Vector {
+			var v:Vector = new Vector();
+			v.x = x * m.a + y * m.b;
+			v.y = x * m.c + y * m.d;
+			return v;
+		}
+		
+		public function multEqualsMatrix(m:Matrix):Vector{
+			x = x * m.a + y * m.b;
+			y = x * m.c + y * m.d;
+			return this;
+		}
+		
+		public function rotate(r:Number):Vector{
+			var c=Math.cos(r);
+			var s=Math.sin(r);
+			return new Vector(x*c-y*s,x*s+y*c);
 		}
 	}
 }

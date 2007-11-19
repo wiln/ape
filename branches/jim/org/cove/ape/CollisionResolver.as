@@ -46,7 +46,7 @@ package org.cove.ape {
             var sumInvMass:Number = pa.invMass + pb.invMass;
             
             // the total friction in a collision is combined but clamped to [0,1]
-            var tf:Number = clamp(1 - (pa.friction + pb.friction), 0, 1);
+            var tf:Number = 1;//clamp(1 - (pa.friction + pb.friction), 0, 1);
             
             // get the collision components, vn and vt
             var ca:Collision = pa.getComponents(normal);
@@ -70,7 +70,8 @@ package org.cove.ape {
             vnA.plusEquals(ca.vt);
             vnB.plusEquals(cb.vt);
            
-            pa.resolveCollision(mtdA, vnA, normal, depth, -1, pb);
+            
+			pa.resolveCollision(mtdA, vnA, normal, depth, -1, pb);
             pb.resolveCollision(mtdB, vnB, normal, depth,  1, pa);
         }
         
@@ -79,7 +80,144 @@ package org.cove.ape {
         	if (input > max) return max;	
             if (input < min) return min;
             return input;
-        } 
+        }
+		
+		internal static function solve(ca:Array, cb:Array, numContactPoints:int, normal:Vector, depthTime:Number, pa:AbstractParticle, pb:AbstractParticle):void{
+			
+			for(var i:int = 0; i < numContactPoints; i++){
+				resolveOverlap(normal, depthTime, ca[i], cb[i], pa, pb);
+			}
+			
+			var va:Vector = new Vector();
+			va.copy(pa.velocity);
+			var ava:Number = pa.angVelocity;
+			var vb:Vector = new Vector();
+			vb.copy(pb.velocity);
+			var avb:Number = pb.angVelocity;
+			for(var j:int = 0; j < numContactPoints; j++){
+				resolveCollision(normal.mult(-1), depthTime, cb[j], ca[j], pb, pa, pb.velocity, pb.angVelocity, pa.velocity, pa.angVelocity);
+			}			
+		}
+		
+		internal static function solvePolyCircle(contactA:Vector, contactB:Vector, normal:Vector, depth:Number, pa:AbstractParticle, pb:AbstractParticle):void{
+			resolveOverlap(normal, depth, contactA, contactB, pa, pb);
+			var va:Vector = new Vector();
+			va.copy(pa.velocity);
+			var ava:Number = pa.angVelocity;
+			var vb:Vector = new Vector();
+			vb.copy(pb.velocity);
+			var avb:Number = pb.angVelocity;
+			resolveCollision(normal.mult(-1), depth, contactB, contactA, pb, pa, pb.velocity, pb.angVelocity, pa.velocity, pa.angVelocity);
+		}
+		
+		internal static function resolveCollision(normal:Vector, depthTime:Number, c0:Vector, c1:Vector, pa:AbstractParticle, pb:AbstractParticle, va:Vector, ava:Number, vb:Vector, avb:Number):void{
+			
+			//pre-computations
+			
+			var r0:Vector = c0.minus(pa.curr);
+			var r1:Vector = c1.minus(pb.curr);
+			var T0:Vector = new Vector(-r0.y, r0.x);
+			var T1:Vector = new Vector(-r1.y, r1.x);
+			var vp0:Vector = va.minus(T0.mult(ava));
+			var vp1:Vector = vb.minus(T1.mult(avb));
+			
+			//impact velocity
+			
+			var vcoll:Vector = vp0.minus(vp1);
+			var vn:Number = vcoll.dot(normal);
+			var Vn:Vector = normal.mult(vn);
+			var Vt:Vector = vcoll.minus(Vn);
+			
+			//separation
+			if(vn > 0){
+				return;
+			}
+			var vt:Number = Vt.magnitude();
+			//Vt.normalize();
+			
+			// compute impulse (friction and restitution).
+			// ------------------------------------------
+			//
+			//									-(1+Cor)(Vel.norm)
+			//			j =  ------------------------------------------------------------
+			//			     [1/Ma + 1/Mb] + [Ia' * (ra x norm)²] + [Ib' * (rb x norm)²]
+			
+			var J:Vector;
+			var Jt:Vector;
+			var Jn:Vector;
+			
+			var t0:Number = (r0.cross(normal)) * (r0.cross(normal)) * pa.invInertia;
+			var t1:Number = (r1.cross(normal)) * (r1.cross(normal)) * pb.invInertia;
+			var invMass0:Number = pa.invMass;
+			var invMass1:Number = pb.invMass;
+			var invMassTotal = invMass0 + invMass1;
+			
+			var denom:Number = invMassTotal + t0 + t1;
+			
+			var jn:Number = vn/denom;
+			var restitution:Number = clamp((pa.elasticity + pb.elasticity), 0, 1);
+			Jn = normal.mult(-(1 + restitution) * jn);
+			
+			//if(useFriction){
+			var totalFriction:Number = clamp((pa.friction + pb.friction), 0, 1);
+				Jt = Vt.normalize().mult(totalFriction * jn);
+			
+			J = Jn.plus(Jt);
+			
+			// changes in momentum
+			
+			var dV0:Vector = J.mult(invMass0);
+			var dV1:Vector = J.mult(-invMass1);
+			
+			var avdamping = 1;
+			var dw0:Number = -(r0.cross(J)) * pa.invInertia * avdamping;
+			var dw1:Number = (r1.cross(J)) * pb.invInertia * avdamping;
+			
+			// apply changes in momentum
+			//trace(pa);
+			//trace(dV0.magnitude());
+			pa.resolveVelocities(dV0, dw0, normal);
+			pb.resolveVelocities(dV1, dw1, normal);
+		}
+		
+		internal static function resolveOverlap(normal:Vector, depthTime:Number, c0:Vector, c1:Vector, pa:AbstractParticle, pb:AbstractParticle):void{
+			var invMass0:Number = pa.invMass;
+			var invMass1:Number = pb.invMass;
+			var invMassTotal:Number = invMass0 + invMass1;
+			
+			var diff:Vector = c1.minus(c0);
+			var relaxation:Number = .5;
+			
+			//trace("diff "+diff);
+			//trace(depthTime);
+			
+			//diff.multEquals(relaxation);
+			
+			var displace0:Vector = new Vector();
+			var displace1:Vector = new Vector();
+			
+			if(invMass0 > 0){
+				displace0 = diff.mult(invMass0/invMassTotal);
+				pa.curr.plusEquals(displace0);
+				//pa.prev.plusEquals(displace0);
+				if(pa.invInertia == 0){
+					//pa.prev.plusEquals(displace0);
+					pa.prev.plusEquals(displace0);
+				}
+			}
+			if(invMass1 > 0){
+				displace1 = diff.mult(-invMass1/invMassTotal);
+				//trace(pb.velocity.magnitude());
+				pb.curr.plusEquals(displace1);
+				//trace(" "+pb.velocity.magnitude());
+				//pb.prev.plusEquals(displace1);
+				if(pb.invInertia == 0){
+					//trace(" uhh");
+					pb.prev.plusEquals(displace1);
+				}
+				//trace(" "+pb.velocity.magnitude());
+			}			
+		}
     }
 }
 

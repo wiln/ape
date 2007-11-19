@@ -237,8 +237,8 @@ package org.cove.ape {
 		 * @private
 		 * returns the average inverse mass.
 		 */		
-		internal override function get invMass():Number {
-			if (p1.fixed && p2.fixed) return 0;
+	   public override function get invMass():Number {
+			if (p1.fixedPosition && p2.fixedPosition) return 0;
 			return 1 / ((p1.mass + p2.mass) / 2);  
 		}
 		
@@ -266,13 +266,13 @@ package org.cove.ape {
 			// if one is fixed then move the other particle the entire way out of collision.
 			// also, dispose of collisions at the sides of the scp. The higher the fixedEndLimit
 			// value, the more of the scp not be effected by collision. 
-			if (p1.fixed) {
+			if (p1.fixedPosition) {
 				if (c2 <= fixedEndLimit) return;
 				lambda.setTo(mtd.x / c2, mtd.y / c2);
 				p2.curr.plusEquals(lambda);
 				p2.velocity = vel;
 
-			} else if (p2.fixed) {
+			} else if (p2.fixedPosition) {
 				if (c1 <= fixedEndLimit) return;
 				lambda.setTo(mtd.x / c1, mtd.y / c1);
 				p1.curr.plusEquals(lambda);

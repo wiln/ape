@@ -25,6 +25,7 @@ package org.cove.ape {
 
 		public static var ONE_EIGHTY_OVER_PI:Number = 180 / Math.PI;
 		public static var PI_OVER_ONE_EIGHTY:Number = Math.PI / 180;
+		public static var TWO_PI:Number = Math.PI * 2;
 
 		/**
 		 * Returns n clamped between min and max
