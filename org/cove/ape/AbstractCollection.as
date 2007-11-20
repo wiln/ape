@@ -92,7 +92,7 @@ package org.cove.ape {
 		public function addParticle(p:AbstractParticle):void {
 			particles.push(p);
 			p.parent = this;
-			//if (isParented) p.init();
+			if (isParented) p.init();
 		}
 		
 		
@@ -117,7 +117,7 @@ package org.cove.ape {
 		 */
 		public function addConstraint(c:AbstractConstraint):void {
 			constraints.push(c);
-			//if (isParented) c.init();
+			if (isParented) c.init();
 		}
 
 
